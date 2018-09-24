@@ -6,22 +6,33 @@ class Collection {
   String _name;
 
   // Collection Constructor
-  Collection(String name, String description, List<CollectionItem> loadedItems){
+  Collection(
+      String name, String description, List<CollectionItem> loadedItems) {
     _name = name;
     _description = description;
     _savedItems = loadedItems;
   }
 
-  void addItem(CollectionItem item){
-
+  void addItem(CollectionItem item) {
+    _savedItems.add(item);
   }
 
-  void removeItem(CollectionItem item){
-
+  void removeItem(CollectionItem item) {
+    _savedItems.remove(item);
   }
 
+  CollectionItem getItemByIndex(int index) {
+    return _savedItems.elementAt(index);
+  }
 
-
+  CollectionItem getItemByName(String itemName) {
+    for (int i = 0; i < _savedItems.length; i++) {
+      if (_savedItems[i].name == itemName){
+        return _savedItems[i];
+      }
+    }
+    return null;
+  }
 }
 
 class CollectionItem {
@@ -31,7 +42,7 @@ class CollectionItem {
   int _value;
 
   //Item Constructor
-  CollectionItem(String name, String description, int value, Image picture){
+  CollectionItem(String name, String description, int value, Image picture) {
     _name = name;
     _description = description;
     _value = value;
@@ -61,6 +72,4 @@ class CollectionItem {
   set picture(Image value) {
     _picture = value;
   }
-
-
 }

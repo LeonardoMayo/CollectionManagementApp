@@ -36,6 +36,10 @@ class _StartPageState extends State<StartPage> {
     });
   }
 
+  void _loadCollectionsOnStartup(){
+
+  }
+
   void _newCollection(){
 
   }
@@ -46,6 +50,8 @@ class _StartPageState extends State<StartPage> {
 
   @override
   Widget build(BuildContext context) {
+
+    _loadCollectionsOnStartup();
 
     return new Scaffold(
       appBar: new AppBar(
@@ -77,6 +83,8 @@ class _StartPageState extends State<StartPage> {
           )
       ),
       body: new Center(
+
+        //New Listview with Collection Names clickable
 
         child: new Column(
 
