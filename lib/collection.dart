@@ -33,6 +33,26 @@ class Collection {
     }
     return null;
   }
+
+  String get name => _name;
+
+  set name(String value) {
+    _name = value;
+  }
+
+  String get description => _description;
+
+  set description(String value) {
+    _description = value;
+  }
+
+  List<CollectionItem> get savedItems => _savedItems;
+
+  set savedItems(List<CollectionItem> value) {
+    _savedItems = value;
+  }
+
+
 }
 
 class CollectionItem {
