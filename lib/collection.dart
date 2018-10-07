@@ -4,6 +4,7 @@ class Collection {
   List<CollectionItem> _savedItems;
   String _description;
   String _name;
+  String _imagePath;
 
   // Collection Constructor
   Collection(
@@ -50,6 +51,12 @@ class Collection {
 
   set savedItems(List<CollectionItem> value) {
     _savedItems = value;
+  }
+
+  String get imagePath => _imagePath;
+
+  set imagePath(String value) {
+    _imagePath = value;
   }
 
 

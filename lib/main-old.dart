@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'collection.dart';
-import 'collection_ui.dart';
-import 'item_ui.dart';
 
 void main() => runApp(new MyApp());
 
@@ -32,8 +30,6 @@ class StartPage extends StatefulWidget {
 class _StartPageState extends State<StartPage> {
 
   List<Collection> _savedCollections = new List<Collection>();
-  CollectionUI collectionUI = new CollectionUI();
-  ItemUI itemUI = new ItemUI();
 
   ///Build Method, most important
   @override
@@ -43,52 +39,52 @@ class _StartPageState extends State<StartPage> {
     }
 
     return new Scaffold(
-      appBar: new AppBar(
-        title: new Text(widget.title),
-      ),
+        appBar: new AppBar(
+          title: new Text(widget.title),
+        ),
 
-      body: _buildCollectionListView(),
+        body: _buildCollectionListView(),
 
-      drawer: new Drawer(
-          child: new ListView(
-            children: <Widget>[
-              new DrawerHeader(
-                child: new Text('Header'),
-                decoration: ShapeDecoration(
-                  shape: CircleBorder(),
-                  color: Colors.black,
+        drawer: new Drawer(
+            child: new ListView(
+              children: <Widget>[
+                new DrawerHeader(
+                  child: new Text('Header'),
+                  decoration: ShapeDecoration(
+                    shape: CircleBorder(),
+                    color: Colors.black,
+                  ),
                 ),
-              ),
-              new ListTile(
-                title: new Text('First Menu Item'),
-                onTap: () {
-                  Navigator.pop(context);
-                },
-              ),
-              new ListTile(
-                title: new Text('Second Menu Item'),
-                onTap: () {
-                  Navigator.pop(context);
-                },
-              ),
-              new Divider(),
-              new ListTile(
-                title: new Text('About'),
-                onTap: () {
-                  Navigator.pop(context);
-                },
-              ),
-            ],
-          )),
+                new ListTile(
+                  title: new Text('First Menu Item'),
+                  onTap: () {
+                    Navigator.pop(context);
+                  },
+                ),
+                new ListTile(
+                  title: new Text('Second Menu Item'),
+                  onTap: () {
+                    Navigator.pop(context);
+                  },
+                ),
+                new Divider(),
+                new ListTile(
+                  title: new Text('About'),
+                  onTap: () {
+                    Navigator.pop(context);
+                  },
+                ),
+              ],
+            )),
 
-      floatingActionButton:
-      Theme(data: Theme.of(context).copyWith(accentColor: Colors.yellow),
-      child: FloatingActionButton(
-        onPressed: _newCollection,
-        tooltip: 'New Collection',
-        child: new Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
-    )
+        floatingActionButton:
+        Theme(data: Theme.of(context).copyWith(accentColor: Colors.yellow),
+          child: FloatingActionButton(
+            onPressed: _newCollection,
+            tooltip: 'New Collection',
+            child: new Icon(Icons.add),
+          ), // This trailing comma makes auto-formatting nicer for build methods.
+        )
     );
   }
 
@@ -121,10 +117,16 @@ class _StartPageState extends State<StartPage> {
               title: Text(collection.name),
             ),
             body:
-            collectionUI.buildCollectionView(collection),
+            new ListView.builder(
+                padding: const EdgeInsets.all(16.0),
+                itemBuilder: (context, i) {
+                  if (i < collection.savedItems.length){
+                    return _buildItemRow(collection.savedItems[i]);
+                  }
+                }),
             floatingActionButton: new FloatingActionButton(
-              onPressed: _newItem,
-              tooltip: 'New Item',
+              onPressed: _newCollection,
+              tooltip: 'New Collection',
               child: new Icon(Icons.add),
             ),
           ); // ... to here.
@@ -171,20 +173,6 @@ class _StartPageState extends State<StartPage> {
 
   ///Methods for displaying the Making of a new Collection
   void _newCollection() {
-    Navigator.of(context).push(
-      new MaterialPageRoute<void>(
-        builder: (BuildContext context) {
-          return new Scaffold(
-            // Add 6 lines from here...
-            appBar: new AppBar(
-              title: Text('New Collection'),
-            ),
-            body:
-            collectionUI.buildNewCollectionView(),
-          ); // ... to here.
-        },
-      ),
-    );
   }
 
 
@@ -201,42 +189,11 @@ class _StartPageState extends State<StartPage> {
   }
 
   void _openItem(CollectionItem item){
-    Navigator.of(context).push(
-      new MaterialPageRoute<void>(
-        builder: (BuildContext context) {
-          return new Scaffold(
-            // Add 6 lines from here...
-            appBar: new AppBar(
-              title: Text(item.name),
-            ),
-            body:
-            itemUI.buildItemView(item),
-          ); // ... to here.
-        },
-      ),
-    );
+
   }
 
   ///Methods for displaying the Making of a new Item
   void _newItem(){
-    Navigator.of(context).push(
-      new MaterialPageRoute<void>(
-        builder: (BuildContext context) {
-          return new Scaffold(
-            // Add 6 lines from here...
-            appBar: new AppBar(
-              title: Text('New Item'),
-            ),
-            body:
-            itemUI.buildNewItenView(),
-//            floatingActionButton: new FloatingActionButton(
-//              onPressed: _newItem,
-//              tooltip: 'New Item',
-//              child: new Icon(Icons.add),
-//            ),
-          ); // ... to here.
-        },
-      ),
-    );
+
   }
 }
