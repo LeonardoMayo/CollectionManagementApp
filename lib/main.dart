@@ -32,8 +32,15 @@ class StartPage extends StatefulWidget {
 class _StartPageState extends State<StartPage> {
 
   List<Collection> _savedCollections = new List<Collection>();
+
   CollectionUI collectionUI = new CollectionUI();
   ItemUI itemUI = new ItemUI();
+
+  Scaffold currentScaffold;
+  Widget lastBody;
+
+  FloatingActionButton addButton;
+  FloatingActionButton backButton;
 
   ///Build Method, most important
   @override
@@ -41,6 +48,18 @@ class _StartPageState extends State<StartPage> {
     if (_savedCollections.length == 0) {
       _loadCollectionsOnStartup();
     }
+
+    addButton = new FloatingActionButton(
+    onPressed: _newCollection,
+    tooltip: 'New Collection',
+    child: new Icon(Icons.add),
+    );
+
+    backButton = new FloatingActionButton(
+      onPressed: _newCollection,
+      tooltip: 'New Collection',
+      child: new Icon(Icons.add),
+    );
 
     return new Scaffold(
       appBar: new AppBar(
@@ -92,6 +111,9 @@ class _StartPageState extends State<StartPage> {
     );
   }
 
+  void _loadLastBody(){
+  }
+
   ///full with Test Collections atm, will load safed collections from files
   ///Collection Methods
   void _loadCollectionsOnStartup() {
@@ -141,6 +163,8 @@ class _StartPageState extends State<StartPage> {
   }
 
   Widget _buildCollectionListView() {
+    currentScaffold = Scaffold.of(context).widget;
+
     if (_savedCollections.length != 0) {
       return ListView.builder(
         padding: const EdgeInsets.all(16.0),
