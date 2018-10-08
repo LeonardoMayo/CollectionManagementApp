@@ -10,7 +10,7 @@ class CollectionUI {
 
   Widget buildCollectionView(Collection collection) {
     return new ListView(children: [
-      returnCollectionHeader(collection),
+//      returnCollectionHeader(collection),
       returnItemListView(collection),
     ]);
   }
@@ -35,7 +35,7 @@ class CollectionUI {
         padding: const EdgeInsets.all(16.0),
         itemBuilder: (context, i) {
           if (i < collection.savedItems.length) {
-            ListTile(
+            return ListTile(
               title: Text(
                 collection.savedItems[i].name,
                 style: TextStyle(fontSize: 14.0),
@@ -50,7 +50,9 @@ class CollectionUI {
 
 
   Widget buildNewCollectionView() {
-    return new ListView(children: []);
+    return new ListView(children: [
+
+    ]);
   }
 
   ItemUI get itemui => _itemui;

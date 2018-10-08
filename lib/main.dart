@@ -30,10 +30,12 @@ class StartPage extends StatefulWidget {
 }
 
 class _StartPageState extends State<StartPage> {
-
   List<Collection> _savedCollections = new List<Collection>();
+
   CollectionUI collectionUI = new CollectionUI();
   ItemUI itemUI = new ItemUI();
+
+  FloatingActionButton addButton;
 
   ///Build Method, most important
   @override
@@ -42,54 +44,53 @@ class _StartPageState extends State<StartPage> {
       _loadCollectionsOnStartup();
     }
 
-    return new Scaffold(
-      appBar: new AppBar(
-        title: new Text(widget.title),
-      ),
-
-      body: _buildCollectionListView(),
-
-      drawer: new Drawer(
-          child: new ListView(
-            children: <Widget>[
-              new DrawerHeader(
-                child: new Text('Header'),
-                decoration: ShapeDecoration(
-                  shape: CircleBorder(),
-                  color: Colors.black,
-                ),
-              ),
-              new ListTile(
-                title: new Text('First Menu Item'),
-                onTap: () {
-                  Navigator.pop(context);
-                },
-              ),
-              new ListTile(
-                title: new Text('Second Menu Item'),
-                onTap: () {
-                  Navigator.pop(context);
-                },
-              ),
-              new Divider(),
-              new ListTile(
-                title: new Text('About'),
-                onTap: () {
-                  Navigator.pop(context);
-                },
-              ),
-            ],
-          )),
-
-      floatingActionButton:
-      Theme(data: Theme.of(context).copyWith(accentColor: Colors.yellow),
-      child: FloatingActionButton(
-        onPressed: _newCollection,
-        tooltip: 'New Collection',
-        child: new Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
-    )
+    addButton = FloatingActionButton(
+      onPressed: _newCollection,
+      tooltip: 'New Collection',
+      child: new Icon(Icons.add),
     );
+
+    return new Scaffold(
+        appBar: new AppBar(
+          title: new Text(widget.title),
+        ),
+        body: _buildCollectionListView(),
+        drawer: new Drawer(
+            child: new ListView(
+          children: <Widget>[
+            new DrawerHeader(
+              child: new Text('Header'),
+              decoration: ShapeDecoration(
+                shape: CircleBorder(),
+                color: Colors.black,
+              ),
+            ),
+            new ListTile(
+              title: new Text('First Menu Item'),
+              onTap: () {
+                Navigator.pop(context);
+              },
+            ),
+            new ListTile(
+              title: new Text('Second Menu Item'),
+              onTap: () {
+                Navigator.pop(context);
+              },
+            ),
+            new Divider(),
+            new ListTile(
+              title: new Text('About'),
+              onTap: () {
+                Navigator.pop(context);
+              },
+            ),
+          ],
+        )),
+        floatingActionButton: Theme(
+          data: Theme.of(context).copyWith(accentColor: Colors.yellow),
+          child:
+              addButton, // This trailing comma makes auto-formatting nicer for build methods.
+        ));
   }
 
   ///full with Test Collections atm, will load safed collections from files
@@ -109,9 +110,12 @@ class _StartPageState extends State<StartPage> {
     _savedCollections.add(collection2);
   }
 
-  ///Scaffold.of(context) --> der aktuell genutzte scaffold!
+  ///Scaffold.of(context).widget --> der aktuell genutzte scaffold!
+
+  Collection currentCollection;
 
   void _openCollection(Collection collection) {
+    currentCollection = collection;
     Navigator.of(context).push(
       new MaterialPageRoute<void>(
         builder: (BuildContext context) {
@@ -121,22 +125,73 @@ class _StartPageState extends State<StartPage> {
               title: Text(collection.name),
             ),
             body:
-            collectionUI.buildCollectionView(collection),
-            floatingActionButton: new FloatingActionButton(
-              onPressed: _newItem,
-              tooltip: 'New Item',
-              child: new Icon(Icons.add),
-            ),
-          ); // ... to here.
+//            new ListView(
+//              children:[
+//                new TextField(
+//                  enabled: false,
+//                  controller: new TextEditingController(text: collection.description),
+//                ),
+//                new Divider(),
+                new ListView.builder(
+                    padding: const EdgeInsets.all(18.0),
+                    itemBuilder: (context, i) {
+                      if (i < collection.savedItems.length) {
+                        return new GestureDetector(
+                            onTap: () {},
+                            onLongPress: () {
+                              confirmToDeleteItem(collection.savedItems[i]);
+                            },
+                            child: new Container(
+                              padding: const EdgeInsets.all(32.0),
+                              child: Row(
+                                children: [
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Container(
+                                          padding: const EdgeInsets.only(
+                                              bottom: 8.0),
+                                          child: Text(
+                                            collection.savedItems[i].name,
+                                            style: TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                        ),
+                                        Text(
+                                          collection.savedItems[i].description,
+                                          style: TextStyle(
+                                            color: Colors.grey[500],
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  Text(collection.savedItems[i].value
+                                      .toString()),
+                                  Icon(
+                                    Icons.euro_symbol,
+                                    color: Colors.red[500],
+                                  ),
+                                ],
+                              ),
+                            ));
+                      }
+                    }),
+
+            floatingActionButton: Theme(
+              data: Theme.of(context).copyWith(accentColor: Colors.yellow),
+              child: new FloatingActionButton(
+                onPressed: _newItem,
+                tooltip: 'New Item',
+                child: new Icon(Icons.add),
+              ),
+            ), // ... to here.
+          );
         },
       ),
-    );
-  }
-
-  ///Methods for displaying Collections
-  Widget _buildCollectionStart(Collection collection){
-    return ListTile(
-
     );
   }
 
@@ -146,7 +201,15 @@ class _StartPageState extends State<StartPage> {
         padding: const EdgeInsets.all(16.0),
         itemBuilder: (context, i) {
           if (i < _savedCollections.length) {
-            return _buildCollectionRow(_savedCollections[i]);
+            return ListTile(
+              title: Text(
+                _savedCollections[i].name,
+                style: TextStyle(fontSize: 18.0),
+              ),
+              onTap: () {
+                _openCollection(_savedCollections[i]);
+              },
+            );
           }
         },
       );
@@ -157,17 +220,23 @@ class _StartPageState extends State<StartPage> {
     }
   }
 
-  Widget _buildCollectionRow(Collection collection) {
-    return ListTile(
-      title: Text(
-        collection.name,
-        style: TextStyle(fontSize: 18.0),
-      ),
-      onTap: () {
-        _openCollection(collection);
-      },
+  void confirmToDeleteItem(CollectionItem item) {
+    new AlertDialog(
+      title: new Text("Are you sure?"),
+      content: new Center(
+          child:
+              new Text("Are you sure you want to delete " + item.name + "?")),
+      actions: <Widget>[
+        new RaisedButton(
+          child: new Text("Yes"),
+          onPressed: () {},
+        )
+      ],
     );
   }
+
+  final newCollectionNameController = TextEditingController();
+  final newCollectionDescController = TextEditingController();
 
   ///Methods for displaying the Making of a new Collection
   void _newCollection() {
@@ -179,64 +248,117 @@ class _StartPageState extends State<StartPage> {
             appBar: new AppBar(
               title: Text('New Collection'),
             ),
-            body:
-            collectionUI.buildNewCollectionView(),
-          ); // ... to here.
-        },
-      ),
-    );
-  }
-
-
-  ///Build Item Methods
-  Widget _buildItemRow(CollectionItem item){
-    return ListTile(
-      title: Text (item.name,
-        style: TextStyle(fontSize: 14.0),
-      ),
-      onTap: (){
-        _openItem(item);
-      },
-    );
-  }
-
-  void _openItem(CollectionItem item){
-    Navigator.of(context).push(
-      new MaterialPageRoute<void>(
-        builder: (BuildContext context) {
-          return new Scaffold(
-            // Add 6 lines from here...
-            appBar: new AppBar(
-              title: Text(item.name),
+            body: new ListView(children: [
+              new TextField(
+                controller: newCollectionNameController,
+                decoration: InputDecoration(
+                  border: InputBorder.none,
+                  hintText: "Collection name",
+                ),
+              ),
+              new TextField(
+                controller: newCollectionDescController,
+                decoration: InputDecoration(
+                  border: InputBorder.none,
+                  hintText: "Collection description",
+                ),
+              ),
+            ]),
+            floatingActionButton: Theme(
+              data: Theme.of(context).copyWith(accentColor: Colors.yellow),
+              child: new FloatingActionButton(
+                onPressed: addCollection,
+                tooltip: 'New Item',
+                child: new Icon(Icons.check),
+              ),
             ),
-            body:
-            itemUI.buildItemView(item),
           ); // ... to here.
         },
       ),
     );
   }
+
+  void addCollection() {
+    Collection collection = new Collection(newCollectionNameController.text,
+        newCollectionDescController.text, new List<CollectionItem>());
+    _savedCollections.add(collection);
+    leaveScreen();
+//    Navigator.of(context).pop();
+//
+//    newCollectionNameController.text = "";
+//    newCollectionDescController.text = "";
+  }
+
+  final newItemNameCntrl = TextEditingController();
+  final newItemDescCntrl = TextEditingController();
+  final newItemValueCntrl = TextEditingController();
 
   ///Methods for displaying the Making of a new Item
-  void _newItem(){
+  void _newItem() {
     Navigator.of(context).push(
       new MaterialPageRoute<void>(
         builder: (BuildContext context) {
           return new Scaffold(
-            // Add 6 lines from here...
-            appBar: new AppBar(
-              title: Text('New Item'),
-            ),
-            body:
-            itemUI.buildNewItenView(),
-//            floatingActionButton: new FloatingActionButton(
-//              onPressed: _newItem,
-//              tooltip: 'New Item',
-//              child: new Icon(Icons.add),
-//            ),
-          ); // ... to here.
+              // Add 6 lines from here...
+              appBar: new AppBar(
+                title: Text('New Item'),
+              ),
+              body: new ListView(children: [
+                new TextField(
+                  controller: newItemNameCntrl,
+                  decoration: InputDecoration(
+                    border: InputBorder.none,
+                    hintText: "Item name",
+                  ),
+                ),
+                new TextField(
+                  controller: newItemDescCntrl,
+                  decoration: InputDecoration(
+                    border: InputBorder.none,
+                    hintText: "Item description",
+                  ),
+                ),
+                new TextField(
+                  controller: newItemValueCntrl,
+                  decoration: InputDecoration(
+                    border: InputBorder.none,
+                    hintText: "Item value",
+                  ),
+                ),
+              ]),
+              floatingActionButton: Theme(
+                data: Theme.of(context).copyWith(accentColor: Colors.yellow),
+                child: new FloatingActionButton(
+                  onPressed: addItem,
+                  tooltip: 'New Item',
+                  child: new Icon(Icons.check),
+                ),
+              )); // ... to here.
         },
       ),
     );
+  }
+
+  void addItem(){
+    int value = int.parse(newItemValueCntrl.text);
+    CollectionItem item = new CollectionItem(newItemNameCntrl.text, newItemDescCntrl.text, value, null);
+    currentCollection.addItem(item);
+    leaveScreen();
+    //    Navigator.of(context).pop();
+//
+//    newItemNameCntrl.text = "";
+//    newItemDescCntrl.text = "";
+//    newItemValueCntrl.text = "";
+  }
+
+  void leaveScreen(){
+    Navigator.of(context).pop();
+
+    newCollectionNameController.text = "";
+    newCollectionDescController.text = "";
+
+    newItemNameCntrl.text = "";
+    newItemDescCntrl.text = "";
+    newItemValueCntrl.text = "";
   }
 }
