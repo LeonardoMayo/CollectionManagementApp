@@ -1,7 +1,10 @@
+import 'dart:async';
+import 'package:path_provider/path_provider.dart';
 import 'package:flutter/material.dart';
 import 'collection.dart';
 import 'collection_ui.dart';
 import 'item_ui.dart';
+import 'dart:io';
 
 void main() => runApp(new MyApp());
 
@@ -108,6 +111,17 @@ class _StartPageState extends State<StartPage> {
 
     _savedCollections.add(collection1);
     _savedCollections.add(collection2);
+
+    if (doesTestFileExist()){
+      Collection collection3;
+
+      readCollection().then((Collection value){
+        collection3 = value;
+      });
+
+      _savedCollections.add(collection3);
+
+    }
   }
 
   ///Scaffold.of(context).widget --> der aktuell genutzte scaffold!
@@ -283,10 +297,9 @@ class _StartPageState extends State<StartPage> {
         newCollectionDescController.text, new List<CollectionItem>());
     _savedCollections.add(collection);
     leaveScreen();
-//    Navigator.of(context).pop();
-//
-//    newCollectionNameController.text = "";
-//    newCollectionDescController.text = "";
+
+    writeCollection(collection);
+
   }
 
   final newItemNameCntrl = TextEditingController();
@@ -344,11 +357,6 @@ class _StartPageState extends State<StartPage> {
     CollectionItem item = new CollectionItem(newItemNameCntrl.text, newItemDescCntrl.text, value, null);
     currentCollection.addItem(item);
     leaveScreen();
-    //    Navigator.of(context).pop();
-//
-//    newItemNameCntrl.text = "";
-//    newItemDescCntrl.text = "";
-//    newItemValueCntrl.text = "";
   }
 
   void leaveScreen(){
@@ -360,5 +368,81 @@ class _StartPageState extends State<StartPage> {
     newItemNameCntrl.text = "";
     newItemDescCntrl.text = "";
     newItemValueCntrl.text = "";
+  }
+
+  Future<String> get _localPath async {
+    final directory = await getApplicationDocumentsDirectory();
+
+    return directory.path;
+  }
+
+  bool doesTestFileExist() {
+    File file;
+    _localFile.then((File value){file = value;});
+    return file.existsSync();
+  }
+
+  Future<File> get _localFile async {
+    final path = await _localPath;
+    return File('$path/collectiontest.txt');
+  }
+
+  void writeCollection(Collection collection) async {
+    final file = await _localFile;
+
+    String name = collection.name;
+    String description = collection.description;
+
+    List<String> sItems = new List<String>();
+    for(int i = 0; i < collection.savedItems.length; i++){
+      CollectionItem item = collection.savedItems[i];
+      String result = item.name+";"+item.description+";"+item.value.toString();
+      sItems.add(result);
+    }
+
+    var sink = file.openWrite();
+
+    sink.writeln(name);
+    sink.writeln(description);
+
+    for(int i = 0; i < sItems.length; i++){
+      sink.writeln(sItems[i]);
+    }
+
+    sink.close();
+
+  }
+
+  Future<Collection> readCollection() async {
+    try {
+      final file = await _localFile;
+
+
+      // Read the file
+      List<String> contents = await file.readAsLines();
+
+      String name = "";
+      String description = "";
+      List<CollectionItem> loadedItems = new List<CollectionItem>();
+
+      name = contents[0];
+      description = contents[1];
+
+      for(int i = 2; i < contents.length; i++){
+
+          String sItem = contents[i];
+          List<String> sItemParts = sItem.split(';');
+          CollectionItem item = new CollectionItem(
+              sItemParts[0], sItemParts[1], int.parse(sItemParts[2]), null
+          );
+
+          loadedItems.add(item);
+      }
+
+      return new Collection(name, description, loadedItems);
+    } catch (e) {
+      // If we encounter an error, return 0
+      return null;
+    }
   }
 }
