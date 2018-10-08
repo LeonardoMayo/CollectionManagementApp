@@ -124,8 +124,6 @@ class _StartPageState extends State<StartPage> {
     }
   }
 
-  ///Scaffold.of(context).widget --> der aktuell genutzte scaffold!
-
   Collection currentCollection;
 
   void _openCollection(Collection collection) {
@@ -370,6 +368,8 @@ class _StartPageState extends State<StartPage> {
     newItemValueCntrl.text = "";
   }
 
+  ///Filesave Methods
+
   Future<String> get _localPath async {
     final directory = await getApplicationDocumentsDirectory();
 
@@ -388,6 +388,7 @@ class _StartPageState extends State<StartPage> {
   }
 
   void writeCollection(Collection collection) async {
+
     final file = await _localFile;
 
     String name = collection.name;
@@ -445,4 +446,5 @@ class _StartPageState extends State<StartPage> {
       return null;
     }
   }
+
 }
