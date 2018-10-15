@@ -102,26 +102,26 @@ class _StartPageState extends State<StartPage> {
     Collection collection1 = new Collection("Test Collection1", "More blabla", [
       new CollectionItem("Item11", "blablubb", 2, null),
       new CollectionItem("Item21", "blubbBla", 3, null)
-    ]);
+    ], "EUR");
 
     Collection collection2 = new Collection("Test Collection2", "More blabla", [
       new CollectionItem("Item12", "blablubb", 2, null),
       new CollectionItem("Item22", "blubbBla", 3, null)
-    ]);
+    ], "USD");
 
     _savedCollections.add(collection1);
     _savedCollections.add(collection2);
-
-    if (doesTestFileExist()){
-      Collection collection3;
-
-      readCollection().then((Collection value){
-        collection3 = value;
-      });
-
-      _savedCollections.add(collection3);
-
-    }
+//    var path = getApplicationDocumentsDirectory();
+//    if (File('$path/collectiontest.txt') != null){
+//      Collection collection3;
+//
+//      readCollection().then((Collection value){
+//        collection3 = value;
+//      });
+//
+//      _savedCollections.add(collection3);
+//
+//    }
   }
 
   Collection currentCollection;
@@ -146,6 +146,7 @@ class _StartPageState extends State<StartPage> {
 //                new Divider(),
                 new ListView.builder(
                     padding: const EdgeInsets.all(18.0),
+                    itemCount: collection.savedItems.length,
                     itemBuilder: (context, i) {
                       if (i < collection.savedItems.length) {
                         return new GestureDetector(
@@ -183,10 +184,7 @@ class _StartPageState extends State<StartPage> {
                                   ),
                                   Text(collection.savedItems[i].value
                                       .toString()),
-                                  Icon(
-                                    Icons.euro_symbol,
-                                    color: Colors.red[500],
-                                  ),
+                                  valueWidgetIcon(),
                                 ],
                               ),
                             ));
@@ -258,30 +256,33 @@ class _StartPageState extends State<StartPage> {
           return new Scaffold(
             // Add 6 lines from here...
             appBar: new AppBar(
-              title: Text('New Collection'),
+              title: Text('create a new collection'),
             ),
             body: new ListView(children: [
-              new TextField(
-                controller: newCollectionNameController,
-                decoration: InputDecoration(
-                  border: InputBorder.none,
-                  hintText: "Collection name",
+              spaceDivider(),
+              nameWidget("Collection name"),
+              spaceDivider(),
+              descriptionWidget("Collection description"),
+              spaceDivider(),
+              Container(
+                padding: EdgeInsets.only(
+                  left: 30.0,
+                  top: 10.0,
+                  bottom: 10.0,
                 ),
+                child: Text("Currency"),
               ),
-              new TextField(
-                controller: newCollectionDescController,
-                decoration: InputDecoration(
-                  border: InputBorder.none,
-                  hintText: "Collection description",
-                ),
-              ),
+              currencyChooser(),
             ]),
             floatingActionButton: Theme(
               data: Theme.of(context).copyWith(accentColor: Colors.yellow),
               child: new FloatingActionButton(
                 onPressed: addCollection,
                 tooltip: 'New Item',
-                child: new Icon(Icons.check),
+                child: new Icon(
+                  Icons.check,
+                  color: Colors.grey[800],
+                ),
               ),
             ),
           ); // ... to here.
@@ -290,14 +291,73 @@ class _StartPageState extends State<StartPage> {
     );
   }
 
+  Widget currencyChooser() {
+    Radio dollarRadio = Radio(
+      value: 0,
+      groupValue: _radioValue,
+      onChanged: _handleCurrencyRadioValueChange,
+    );
+    Radio euroRadio = Radio(
+      value: 1,
+      groupValue: _radioValue,
+      onChanged: _handleCurrencyRadioValueChange,
+    );
+
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      children: [
+        Column(
+          children: [
+            dollarRadio,
+          ],
+        ),
+        Column(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.attach_money,
+              color: Colors.red,
+              size: 40.0,
+            ),
+          ],
+        ),
+        Column(
+          children: [
+            euroRadio,
+          ],
+        ),
+        Column(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.euro_symbol,
+              color: Colors.red,
+              size: 40.0,
+            ),
+          ],
+        )
+      ],
+    );
+  }
+
+  int _radioValue;
+
+  _handleCurrencyRadioValueChange(dynamic value) {
+    setState(() {
+      print(value.toString());
+      _radioValue = value;
+    });
+  }
+
   void addCollection() {
     Collection collection = new Collection(newCollectionNameController.text,
-        newCollectionDescController.text, new List<CollectionItem>());
+        newCollectionDescController.text, new List<CollectionItem>(), "");
     _savedCollections.add(collection);
     leaveScreen();
 
     writeCollection(collection);
-
   }
 
   final newItemNameCntrl = TextEditingController();
@@ -306,6 +366,12 @@ class _StartPageState extends State<StartPage> {
 
   ///Methods for displaying the Making of a new Item
   void _newItem() {
+    Widget itemNameWidget = nameWidget("Item name");
+    Widget itemDescriptionWidget = descriptionWidget("Item description");
+    Widget itemValueWidget = valueWidget("Item value", "");
+    Widget itemCountWidget = countWidget("Item count", "");
+    Widget itemFotoWidget = photoWidget(null);
+
     Navigator.of(context).push(
       new MaterialPageRoute<void>(
         builder: (BuildContext context) {
@@ -315,27 +381,16 @@ class _StartPageState extends State<StartPage> {
                 title: Text('New Item'),
               ),
               body: new ListView(children: [
-                new TextField(
-                  controller: newItemNameCntrl,
-                  decoration: InputDecoration(
-                    border: InputBorder.none,
-                    hintText: "Item name",
-                  ),
-                ),
-                new TextField(
-                  controller: newItemDescCntrl,
-                  decoration: InputDecoration(
-                    border: InputBorder.none,
-                    hintText: "Item description",
-                  ),
-                ),
-                new TextField(
-                  controller: newItemValueCntrl,
-                  decoration: InputDecoration(
-                    border: InputBorder.none,
-                    hintText: "Item value",
-                  ),
-                ),
+                spaceDivider(),
+                itemNameWidget,
+                spaceDivider(),
+                itemDescriptionWidget,
+                spaceDivider(),
+                itemValueWidget,
+                spaceDivider(),
+                itemCountWidget,
+                spaceDivider(),
+                itemFotoWidget,
               ]),
               floatingActionButton: Theme(
                 data: Theme.of(context).copyWith(accentColor: Colors.yellow),
@@ -344,20 +399,21 @@ class _StartPageState extends State<StartPage> {
                   tooltip: 'New Item',
                   child: new Icon(Icons.check),
                 ),
-              )); // ... to here.
+              ));
         },
       ),
     );
   }
 
-  void addItem(){
+  void addItem() {
     int value = int.parse(newItemValueCntrl.text);
-    CollectionItem item = new CollectionItem(newItemNameCntrl.text, newItemDescCntrl.text, value, null);
+    CollectionItem item = new CollectionItem(
+        newItemNameCntrl.text, newItemDescCntrl.text, value, null);
     currentCollection.addItem(item);
     leaveScreen();
   }
 
-  void leaveScreen(){
+  void leaveScreen() {
     Navigator.of(context).pop();
 
     newCollectionNameController.text = "";
@@ -368,8 +424,252 @@ class _StartPageState extends State<StartPage> {
     newItemValueCntrl.text = "";
   }
 
-  ///Filesave Methods
+  Widget spaceDivider() {
+    return SizedBox(
+      height: 20.0,
+      width: 100.0,
+    );
+  }
 
+  ///Multiple usable Widgets
+  Widget nameWidget(String text) {
+    return Row(
+      children: <Widget>[
+        Expanded(
+          child: new Column(
+            children: <Widget>[
+              spaceDivider(),
+              new Container(
+                padding: const EdgeInsets.all(10.0),
+                decoration: BoxDecoration(
+                    color: Colors.grey[800],
+                    borderRadius:
+                        new BorderRadius.all(new Radius.circular(18.0)),
+                    border: Border.all(
+                      color: Colors.grey,
+                      width: 3.0,
+                      style: BorderStyle.solid,
+                    )),
+                child: new TextField(
+                  controller: newItemNameCntrl,
+                  decoration: InputDecoration(
+                    border: InputBorder.none,
+                    hintText: text,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        )
+      ],
+    );
+  }
+
+  Widget descriptionWidget(String text) {
+    return Row(
+      children: <Widget>[
+        Expanded(
+          child: Column(
+            children: <Widget>[
+              Container(
+                padding: const EdgeInsets.only(
+                  top: 10.0,
+                  left: 10.0,
+                  right: 10.0,
+                  bottom: 50.0,
+                ),
+                decoration: BoxDecoration(
+                    color: Colors.grey[800],
+                    borderRadius: BorderRadius.all(Radius.circular(18.0)),
+                    border: Border.all(
+                      color: Colors.grey,
+                      width: 3.0,
+                      style: BorderStyle.solid,
+                    )),
+                child: TextField(
+                  controller: newItemNameCntrl,
+                  decoration: InputDecoration(
+                    border: InputBorder.none,
+                    hintText: text,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget valueWidget(String hinttext, String text) {
+    return Row(
+      children: <Widget>[
+        Expanded(
+          child: Column(
+            children: <Widget>[
+              Container(
+                padding: const EdgeInsets.all(10.0),
+                decoration: BoxDecoration(
+                    color: Colors.grey[800],
+                    borderRadius:
+                        new BorderRadius.all(new Radius.circular(18.0)),
+                    border: Border.all(
+                      color: Colors.grey,
+                      width: 3.0,
+                      style: BorderStyle.solid,
+                    )),
+                child: TextField(
+                  controller: newItemNameCntrl,
+                  decoration: InputDecoration(
+                    border: InputBorder.none,
+                    hintText: hinttext,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+        Column(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              padding: EdgeInsets.all(10.0),
+              child: valueWidgetIcon()
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget valueWidgetIcon(){
+    if (currentCollection.currency.contains("EUR")){
+      return Container(
+        child: Icon(Icons.euro_symbol, color: Colors.red, size: 40.0,),
+      );
+    } else {
+      return Container(
+          child: Icon(Icons.attach_money, color: Colors.red, size: 40.0,),);
+    }
+  }
+
+  Widget countWidget(String hinttext, String text) {
+    return Row(
+      children: <Widget>[
+        Expanded(
+          child: Column(
+            children: <Widget>[
+              Container(
+                padding: const EdgeInsets.all(10.0),
+                decoration: BoxDecoration(
+                    color: Colors.grey[800],
+                    borderRadius:
+                        new BorderRadius.all(new Radius.circular(18.0)),
+                    border: Border.all(
+                      color: Colors.grey,
+                      width: 3.0,
+                      style: BorderStyle.solid,
+                    )),
+                child: TextField(
+                  controller: newItemNameCntrl,
+                  decoration: InputDecoration(
+                    border: InputBorder.none,
+                    hintText: hinttext,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+        Column(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              padding: EdgeInsets.all(10.0),
+              child: Icon(
+                Icons.playlist_play,
+                color: Colors.red,
+                size: 40.0,
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget photoWidget(CollectionItem item) {
+    return Row(
+      children: <Widget>[
+        Column(
+          children: <Widget>[
+            Container(
+              padding: EdgeInsets.all(10.0),
+              child: photoWidgetImagePart(item),
+            ),
+          ],
+        ),
+        Expanded(
+          child: Column(children: <Widget>[
+            Container(
+              padding: EdgeInsets.all(20.0),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.all(new Radius.circular(18.0)),
+                border: Border.all(
+                  color: Colors.grey,
+                  style: BorderStyle.solid,
+                ),
+              ),
+              child: Text("placeholder"),
+            ),
+          ]),
+        ),
+        Column(
+          children: <Widget>[
+            Container(
+                padding: EdgeInsets.all(10.0),
+                child: GestureDetector(
+                  child: Icon(
+                    Icons.camera_enhance,
+                    color: Colors.red,
+                    size: 40.0,
+                  ),
+                  onTap: openCameraActivity(),
+                )),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget photoWidgetImagePart(CollectionItem item) {
+    if (item != null && item.picture == null) {
+      return Container(
+        padding: EdgeInsets.all(10.0),
+        child: Image.network(item.picturePath),
+      );
+    } else {
+      return Container(
+        padding: EdgeInsets.all(10.0),
+        decoration: BoxDecoration(
+          color: Colors.grey[800],
+        ),
+        child: Icon(
+          Icons.camera_alt,
+          color: Colors.grey[700],
+          size: 40.0,
+        ),
+      );
+    }
+  }
+
+  openCameraActivity() {
+    print("camera");
+  }
+
+  ///Persistence Methods
   Future<String> get _localPath async {
     final directory = await getApplicationDocumentsDirectory();
 
@@ -378,8 +678,14 @@ class _StartPageState extends State<StartPage> {
 
   bool doesTestFileExist() {
     File file;
-    _localFile.then((File value){file = value;});
-    return file.existsSync();
+    _localFile.then((File value) {
+      file = value;
+    });
+    bool result;
+    file.exists().then((bool value) {
+      result = value;
+    });
+    return result;
   }
 
   Future<File> get _localFile async {
@@ -388,16 +694,16 @@ class _StartPageState extends State<StartPage> {
   }
 
   void writeCollection(Collection collection) async {
-
     final file = await _localFile;
 
     String name = collection.name;
     String description = collection.description;
 
     List<String> sItems = new List<String>();
-    for(int i = 0; i < collection.savedItems.length; i++){
+    for (int i = 0; i < collection.savedItems.length; i++) {
       CollectionItem item = collection.savedItems[i];
-      String result = item.name+";"+item.description+";"+item.value.toString();
+      String result =
+          item.name + ";" + item.description + ";" + item.value.toString();
       sItems.add(result);
     }
 
@@ -406,18 +712,16 @@ class _StartPageState extends State<StartPage> {
     sink.writeln(name);
     sink.writeln(description);
 
-    for(int i = 0; i < sItems.length; i++){
+    for (int i = 0; i < sItems.length; i++) {
       sink.writeln(sItems[i]);
     }
 
     sink.close();
-
   }
 
   Future<Collection> readCollection() async {
     try {
       final file = await _localFile;
-
 
       // Read the file
       List<String> contents = await file.readAsLines();
@@ -425,26 +729,24 @@ class _StartPageState extends State<StartPage> {
       String name = "";
       String description = "";
       List<CollectionItem> loadedItems = new List<CollectionItem>();
+      String currency = "";
 
       name = contents[0];
       description = contents[1];
 
-      for(int i = 2; i < contents.length; i++){
+      for (int i = 2; i < contents.length; i++) {
+        String sItem = contents[i];
+        List<String> sItemParts = sItem.split(';');
+        CollectionItem item = new CollectionItem(
+            sItemParts[0], sItemParts[1], int.parse(sItemParts[2]), null);
 
-          String sItem = contents[i];
-          List<String> sItemParts = sItem.split(';');
-          CollectionItem item = new CollectionItem(
-              sItemParts[0], sItemParts[1], int.parse(sItemParts[2]), null
-          );
-
-          loadedItems.add(item);
+        loadedItems.add(item);
       }
 
-      return new Collection(name, description, loadedItems);
+      return new Collection(name, description, loadedItems, currency);
     } catch (e) {
       // If we encounter an error, return 0
       return null;
     }
   }
-
 }

@@ -5,13 +5,16 @@ class Collection {
   String _description;
   String _name;
   String _imagePath;
+  String _currency;
+  Icon _currencyIcon;
 
   // Collection Constructor
   Collection(
-      String name, String description, List<CollectionItem> loadedItems) {
+      String name, String description, List<CollectionItem> loadedItems, String currency) {
     _name = name;
     _description = description;
     _savedItems = loadedItems;
+    _currency = currency;
   }
 
   void addItem(CollectionItem item) {
@@ -59,14 +62,28 @@ class Collection {
     _imagePath = value;
   }
 
+  Icon get currencyIcon => _currencyIcon;
+
+  set currencyIcon(Icon value) {
+    _currencyIcon = value;
+  }
+
+  String get currency => _currency;
+
+  set currency(String value) {
+    _currency = value;
+  }
+
 
 }
 
 class CollectionItem {
   Image _picture;
+  String _picturePath;
   String _name;
   String _description;
   int _value;
+  int _count;
 
   //Item Constructor
   CollectionItem(String name, String description, int value, Image picture) {
@@ -99,4 +116,18 @@ class CollectionItem {
   set picture(Image value) {
     _picture = value;
   }
+
+  int get count => _count;
+
+  set count(int value) {
+    _count = value;
+  }
+
+  String get picturePath => _picturePath;
+
+  set picturePath(String value) {
+    _picturePath = value;
+  }
+
+
 }

@@ -94,12 +94,12 @@ class _StartPageState extends State<StartPage> {
     Collection collection1 = new Collection("Test Collection1", "More blabla", [
       new CollectionItem("Item11", "blablubb", 2, null),
       new CollectionItem("Item21", "blubbBla", 3, null)
-    ]);
+    ], "");
 
     Collection collection2 = new Collection("Test Collection2", "More blabla", [
       new CollectionItem("Item12", "blablubb", 2, null),
       new CollectionItem("Item22", "blubbBla", 3, null)
-    ]);
+    ], "");
 
     _savedCollections.add(collection1);
     _savedCollections.add(collection2);
