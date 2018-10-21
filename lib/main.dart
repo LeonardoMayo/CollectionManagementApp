@@ -60,54 +60,62 @@ class _StartPageState extends State<StartPage> {
         body: _buildCollectionListView(),
         drawer: new Drawer(
             child: new ListView(
-          children: <Widget>[
-            new DrawerHeader(
-              child: new Text('Header'),
-              decoration: ShapeDecoration(
-                shape: CircleBorder(),
-                color: Colors.black,
-              ),
-            ),
-            new ListTile(
-              title: new Text('First Menu Item'),
-              onTap: () {
-                Navigator.pop(context);
-              },
-            ),
-            new ListTile(
-              title: new Text('Second Menu Item'),
-              onTap: () {
-                Navigator.pop(context);
-              },
-            ),
-            new Divider(),
-            new ListTile(
-              title: new Text('About'),
-              onTap: () {
-                Navigator.pop(context);
-              },
-            ),
-          ],
-        )),
+              children: <Widget>[
+                new DrawerHeader(
+                  child: new Text('Header'),
+                  decoration: ShapeDecoration(
+                    shape: CircleBorder(),
+                    color: Colors.black,
+                  ),
+                ),
+                new ListTile(
+                  title: new Text('First Menu Item'),
+                  onTap: () {
+                    Navigator.pop(context);
+                  },
+                ),
+                new ListTile(
+                  title: new Text('Second Menu Item'),
+                  onTap: () {
+                    Navigator.pop(context);
+                  },
+                ),
+                new Divider(),
+                new ListTile(
+                  title: new Text('About'),
+                  onTap: () {
+                    Navigator.pop(context);
+                  },
+                ),
+              ],
+            )),
         floatingActionButton: Theme(
           data: Theme.of(context).copyWith(accentColor: Colors.yellow),
           child:
-              addButton, // This trailing comma makes auto-formatting nicer for build methods.
+          addButton, // This trailing comma makes auto-formatting nicer for build methods.
         ));
   }
 
   ///full with Test Collections atm, will load safed collections from files
   ///Collection Methods
   void _loadCollectionsOnStartup() {
-    Collection collection1 = new Collection("Test Collection1", "More blabla", [
-      new CollectionItem("Item11", "blablubb", 2, null),
-      new CollectionItem("Item21", "blubbBla", 3, null)
-    ], "EUR");
+    Collection collection1 = new Collection(
+        "Test Collection1",
+        "More blabla",
+        [
+          new CollectionItem("Item11", "blablubb", 2, null),
+          new CollectionItem("Item21", "blubbBla", 3, null)
+        ],
+        "EUR");
 
-    Collection collection2 = new Collection("Test Collection2", "More blabla", [
-      new CollectionItem("Item12", "blablubb", 2, null),
-      new CollectionItem("Item22", "blubbBla", 3, null)
-    ], "USD");
+    Collection collection2 = new Collection(
+        "Test Collection2",
+        "More blabla",
+        [
+          new CollectionItem("Item12", "blablubb", 2, null),
+          new CollectionItem("Item22", "blubbBla", 3, null)
+        ],
+        "USD");
 
     _savedCollections.add(collection1);
     _savedCollections.add(collection2);
@@ -127,6 +135,29 @@ class _StartPageState extends State<StartPage> {
   Collection currentCollection;
 
   void _openCollection(Collection collection) {
+    Widget collectionHeader = Container(
+      padding: EdgeInsets.all(50.0),
+      decoration: BoxDecoration(
+          color: Colors.grey[800],
+          borderRadius: BorderRadius.circular(5.0),
+          border: Border.all(color: Colors.grey, style: BorderStyle.solid)),
+      child: Column(
+        children: <Widget>[
+          Container(
+            child: Text(
+              collection.name,
+              style: TextStyle(fontSize: 22.0, fontWeight: FontWeight.bold),
+            ),
+          ),
+          Text(
+            collection.description,
+            style: TextStyle(fontSize: 20.0, color: Colors.grey[700]),
+          ),
+          spaceDivider()
+        ],
+      ),
+    );
+
     currentCollection = collection;
     Navigator.of(context).push(
       new MaterialPageRoute<void>(
@@ -136,60 +167,57 @@ class _StartPageState extends State<StartPage> {
             appBar: new AppBar(
               title: Text(collection.name),
             ),
-            body:
-//            new ListView(
-//              children:[
-//                new TextField(
-//                  enabled: false,
-//                  controller: new TextEditingController(text: collection.description),
-//                ),
-//                new Divider(),
-                new ListView.builder(
-                    padding: const EdgeInsets.all(18.0),
-                    itemCount: collection.savedItems.length,
-                    itemBuilder: (context, i) {
-                      if (i < collection.savedItems.length) {
-                        return new GestureDetector(
-                            onTap: () {},
-                            onLongPress: () {
-                              confirmToDeleteItem(collection.savedItems[i]);
-                            },
-                            child: new Container(
-                              padding: const EdgeInsets.all(32.0),
-                              child: Row(
-                                children: [
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Container(
-                                          padding: const EdgeInsets.only(
-                                              bottom: 8.0),
-                                          child: Text(
-                                            collection.savedItems[i].name,
-                                            style: TextStyle(
-                                              fontWeight: FontWeight.bold,
-                                            ),
-                                          ),
+            body: new ListView.builder(
+                padding: const EdgeInsets.all(18.0),
+                itemCount: collection.savedItems.length + 1,
+                itemBuilder: (context, i) {
+                  if (i == 0) {
+                    return collectionHeader;
+                  } else {
+                    return new GestureDetector(
+                        onTap: () {_openItem(collection.savedItems[i - 1]);},
+                        onLongPress: () {
+                          confirmToDeleteItem(collection.savedItems[i - 1]);
+                        },
+                        child: new Container(
+                          padding: const EdgeInsets.all(32.0),
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Container(
+                                      padding:
+                                      const EdgeInsets.only(bottom: 8.0),
+                                      child: Text(
+                                        collection.savedItems[i - 1].name,
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 16.0,
                                         ),
-                                        Text(
-                                          collection.savedItems[i].description,
-                                          style: TextStyle(
-                                            color: Colors.grey[500],
-                                          ),
-                                        ),
-                                      ],
+                                      ),
                                     ),
-                                  ),
-                                  Text(collection.savedItems[i].value
-                                      .toString()),
-                                  valueWidgetIcon(),
-                                ],
+                                    Text(
+                                      collection.savedItems[i - 1].description,
+                                      style: TextStyle(
+                                        color: Colors.grey[500],
+                                        fontSize: 16.0,
+                                      ),
+                                    ),
+                                  ],
+                                ),
                               ),
-                            ));
-                      }
-                    }),
+                              Text(
+                                collection.savedItems[i - 1].value.toString(),
+                                style: TextStyle(fontSize: 18.0),
+                              ),
+                              valueWidgetIcon(20.0),
+                            ],
+                          ),
+                        ));
+                  }
+                }),
 
             floatingActionButton: Theme(
               data: Theme.of(context).copyWith(accentColor: Colors.yellow),
@@ -226,7 +254,7 @@ class _StartPageState extends State<StartPage> {
     } else {
       return new Center(
           child: Text(
-              "You don't have any collections yet! Tap the '+' below to create one!"));
+              "You don't have any collections yet! \nTap the '+' below to create one!"));
     }
   }
 
@@ -235,7 +263,7 @@ class _StartPageState extends State<StartPage> {
       title: new Text("Are you sure?"),
       content: new Center(
           child:
-              new Text("Are you sure you want to delete " + item.name + "?")),
+          new Text("Are you sure you want to delete " + item.name + "?")),
       actions: <Widget>[
         new RaisedButton(
           child: new Text("Yes"),
@@ -363,6 +391,8 @@ class _StartPageState extends State<StartPage> {
   final newItemNameCntrl = TextEditingController();
   final newItemDescCntrl = TextEditingController();
   final newItemValueCntrl = TextEditingController();
+  final newItemCountCntrl = TextEditingController();
+  final newItemPhotoCntrl = TextEditingController();
 
   ///Methods for displaying the Making of a new Item
   void _newItem() {
@@ -376,7 +406,7 @@ class _StartPageState extends State<StartPage> {
       new MaterialPageRoute<void>(
         builder: (BuildContext context) {
           return new Scaffold(
-              // Add 6 lines from here...
+            // Add 6 lines from here...
               appBar: new AppBar(
                 title: Text('New Item'),
               ),
@@ -444,7 +474,7 @@ class _StartPageState extends State<StartPage> {
                 decoration: BoxDecoration(
                     color: Colors.grey[800],
                     borderRadius:
-                        new BorderRadius.all(new Radius.circular(18.0)),
+                    new BorderRadius.all(new Radius.circular(18.0)),
                     border: Border.all(
                       color: Colors.grey,
                       width: 3.0,
@@ -487,7 +517,7 @@ class _StartPageState extends State<StartPage> {
                       style: BorderStyle.solid,
                     )),
                 child: TextField(
-                  controller: newItemNameCntrl,
+                  controller: newItemDescCntrl,
                   decoration: InputDecoration(
                     border: InputBorder.none,
                     hintText: text,
@@ -512,14 +542,14 @@ class _StartPageState extends State<StartPage> {
                 decoration: BoxDecoration(
                     color: Colors.grey[800],
                     borderRadius:
-                        new BorderRadius.all(new Radius.circular(18.0)),
+                    new BorderRadius.all(new Radius.circular(18.0)),
                     border: Border.all(
                       color: Colors.grey,
                       width: 3.0,
                       style: BorderStyle.solid,
                     )),
                 child: TextField(
-                  controller: newItemNameCntrl,
+                  controller: newItemValueCntrl,
                   decoration: InputDecoration(
                     border: InputBorder.none,
                     hintText: hinttext,
@@ -534,23 +564,30 @@ class _StartPageState extends State<StartPage> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Container(
-              padding: EdgeInsets.all(10.0),
-              child: valueWidgetIcon()
-            ),
+                padding: EdgeInsets.all(10.0), child: valueWidgetIcon(40.0)),
           ],
         ),
       ],
     );
   }
 
-  Widget valueWidgetIcon(){
-    if (currentCollection.currency.contains("EUR")){
+  Widget valueWidgetIcon(double size) {
+    if (currentCollection.currency.contains("EUR")) {
       return Container(
-        child: Icon(Icons.euro_symbol, color: Colors.red, size: 40.0,),
+        child: Icon(
+          Icons.euro_symbol,
+          color: Colors.red,
+          size: size,
+        ),
       );
     } else {
       return Container(
-          child: Icon(Icons.attach_money, color: Colors.red, size: 40.0,),);
+        child: Icon(
+          Icons.attach_money,
+          color: Colors.red,
+          size: size,
+        ),
+      );
     }
   }
 
@@ -565,14 +602,14 @@ class _StartPageState extends State<StartPage> {
                 decoration: BoxDecoration(
                     color: Colors.grey[800],
                     borderRadius:
-                        new BorderRadius.all(new Radius.circular(18.0)),
+                    new BorderRadius.all(new Radius.circular(18.0)),
                     border: Border.all(
                       color: Colors.grey,
                       width: 3.0,
                       style: BorderStyle.solid,
                     )),
                 child: TextField(
-                  controller: newItemNameCntrl,
+                  controller: newItemCountCntrl,
                   decoration: InputDecoration(
                     border: InputBorder.none,
                     hintText: hinttext,
@@ -614,7 +651,8 @@ class _StartPageState extends State<StartPage> {
         Expanded(
           child: Column(children: <Widget>[
             Container(
-              padding: EdgeInsets.all(20.0),
+              padding: EdgeInsets.only(
+                  left: 100.0, top: 20.0, right: 100.0, bottom: 20.0),
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.all(new Radius.circular(18.0)),
                 border: Border.all(
@@ -622,7 +660,10 @@ class _StartPageState extends State<StartPage> {
                   style: BorderStyle.solid,
                 ),
               ),
-              child: Text("placeholder"),
+              child: Text(
+                "Item picture",
+                textAlign: TextAlign.center,
+              ),
             ),
           ]),
         ),
@@ -667,6 +708,23 @@ class _StartPageState extends State<StartPage> {
 
   openCameraActivity() {
     print("camera");
+  }
+
+  ///Methods for Item Details screen
+  void _openItem(CollectionItem item) {
+
+    Widget body = Container();
+    Navigator.of(context).push(
+        new MaterialPageRoute<void>(
+            builder: (BuildContext context) {
+              return new Scaffold(
+                // Add 6 lines from here...
+                appBar: new AppBar(
+                  title: Text(item.name),
+                ),
+                body: spaceDivider(),
+              );
+            }));
   }
 
   ///Persistence Methods
