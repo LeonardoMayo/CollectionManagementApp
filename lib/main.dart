@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:path_provider/path_provider.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'collection.dart';
 import 'collection_ui.dart';
 import 'item_ui.dart';
@@ -40,12 +41,43 @@ class _StartPageState extends State<StartPage> {
 
   FloatingActionButton addButton;
 
+
+  String filePath;
+
+  @override
+  initState(){
+    super.initState();
+
+    setFilePath();
+//    if (_savedCollections.length == 0) {
+//      _loadCollectionsOnStartup();
+//    }
+    loadAppManagementFile();
+  }
+
+  @override
+  dispose(){
+    super.dispose();
+  }
+
+  void loadAppManagementFile() async{
+    File file = await _collectionManagementFile;
+
+    file.readAsLines().then((List<String> data){
+      setState(() {
+
+        for(int i = 0; i < data.length; i++){
+          _loadCollectionFromFile(data[i]);
+        }
+
+      });
+    });
+
+  }
+
   ///Build Method, most important
   @override
   Widget build(BuildContext context) {
-    if (_savedCollections.length == 0) {
-      _loadCollectionsOnStartup();
-    }
 
     addButton = FloatingActionButton(
       onPressed: _newCollection,
@@ -103,8 +135,8 @@ class _StartPageState extends State<StartPage> {
         "Test Collection1",
         "More blabla",
         [
-          new CollectionItem("Item11", "blablubb", 2, null),
-          new CollectionItem("Item21", "blubbBla", 3, null)
+          new CollectionItem("Item11", "blablubb", 2, 1,null),
+          new CollectionItem("Item21", "blubbBla", 3, 1,null)
         ],
         "EUR");
 
@@ -112,8 +144,8 @@ class _StartPageState extends State<StartPage> {
         "Test Collection2",
         "More blabla",
         [
-          new CollectionItem("Item12", "blablubb", 2, null),
-          new CollectionItem("Item22", "blubbBla", 3, null)
+          new CollectionItem("Item12", "blablubb", 2, 1,null),
+          new CollectionItem("Item22", "blubbBla", 3, 1,null)
         ],
         "USD");
 
@@ -130,6 +162,39 @@ class _StartPageState extends State<StartPage> {
 //      _savedCollections.add(collection3);
 //
 //    }
+  }
+
+  void _loadCollectionFromFile( String fileName){
+    String currentPath = filePath + fileName;
+    print( currentPath);
+
+    File file = File(currentPath);
+    file.readAsLines().then((List<String> lines) {
+      String name, description, currency;
+      List<CollectionItem> savedItems = new List<CollectionItem>();
+
+      name = lines[0];
+      description = lines[1];
+      currency = lines[2];
+
+      for(int i = 3; i < lines.length; i++){
+        List<String> contents = lines[i].split(";");
+
+        String itemName, itemDesc, itemPicPath;
+        int itemValue, itemCount;
+
+        itemName = contents[0];
+        itemDesc = contents[1];
+        itemValue = int.parse(contents[2]);
+        itemCount = int.parse(contents[3]);
+        itemPicPath = contents[4];
+
+        savedItems.add(CollectionItem(itemName, itemDesc, itemValue, itemCount, itemPicPath));
+      }
+
+      _savedCollections.add(Collection(name, description, savedItems, currency));
+
+    });
   }
 
   Collection currentCollection;
@@ -437,9 +502,11 @@ class _StartPageState extends State<StartPage> {
 
   void addItem() {
     int value = int.parse(newItemValueCntrl.text);
+    int count = int.parse(newItemCountCntrl.text);
     CollectionItem item = new CollectionItem(
-        newItemNameCntrl.text, newItemDescCntrl.text, value, null);
+        newItemNameCntrl.text, newItemDescCntrl.text, value,count, null);
     currentCollection.addItem(item);
+    writeItemIntoCollectionFile(currentCollection, item);
     leaveScreen();
   }
 
@@ -734,6 +801,14 @@ class _StartPageState extends State<StartPage> {
     return directory.path;
   }
 
+  void setFilePath() async {
+    final rawPath = await getApplicationDocumentsDirectory();
+    String result = rawPath.path + "/collections/";
+
+    filePath = result;
+
+  }
+
   bool doesTestFileExist() {
     File file;
     _localFile.then((File value) {
@@ -751,17 +826,37 @@ class _StartPageState extends State<StartPage> {
     return File('$path/collectiontest.txt');
   }
 
+  Future<File> get _collectionManagementFile async {
+    final path = await _localPath;
+    try {
+      return File("$path/appmanager.txt");
+    } catch (e) {
+      File file = new File("$path/appmanager.txt");
+      return file;
+    }
+  }
+
+  File _getCorrectFile(String name){
+    final path = filePath + name;
+    try {
+      return new File(path);
+    } catch(e){
+
+    }
+  }
+
   void writeCollection(Collection collection) async {
-    final file = await _localFile;
+    final file = _getCorrectFile(collection.name);
 
     String name = collection.name;
     String description = collection.description;
+    String currency = collection.currency;
 
     List<String> sItems = new List<String>();
     for (int i = 0; i < collection.savedItems.length; i++) {
       CollectionItem item = collection.savedItems[i];
       String result =
-          item.name + ";" + item.description + ";" + item.value.toString();
+          item.name + ";" + item.description + ";" + item.value.toString() +";"+item.count.toString();
       sItems.add(result);
     }
 
@@ -769,12 +864,25 @@ class _StartPageState extends State<StartPage> {
 
     sink.writeln(name);
     sink.writeln(description);
+    sink.writeln(currency);
 
     for (int i = 0; i < sItems.length; i++) {
       sink.writeln(sItems[i]);
     }
 
     sink.close();
+  }
+
+  void writeItemIntoCollectionFile(Collection collection, CollectionItem item) async {
+    final file = _getCorrectFile(collection.name);
+
+    String result = item.name + ";" + item.description + ";" + item.value.toString() +";"+item.count.toString();
+    var sink = file.openWrite();
+
+    sink.writeln(result);
+
+    sink.close();
+
   }
 
   Future<Collection> readCollection() async {
@@ -796,7 +904,7 @@ class _StartPageState extends State<StartPage> {
         String sItem = contents[i];
         List<String> sItemParts = sItem.split(';');
         CollectionItem item = new CollectionItem(
-            sItemParts[0], sItemParts[1], int.parse(sItemParts[2]), null);
+            sItemParts[0], sItemParts[1], int.parse(sItemParts[2]),int.parse(sItemParts[3]), null);
 
         loadedItems.add(item);
       }

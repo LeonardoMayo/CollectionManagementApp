@@ -86,11 +86,19 @@ class CollectionItem {
   int _count;
 
   //Item Constructor
-  CollectionItem(String name, String description, int value, Image picture) {
+//  CollectionItem(String name, String description, int value, Image picture) {
+//    _name = name;
+//    _description = description;
+//    _value = value;
+//    _picture = picture;
+//  }
+
+  CollectionItem(String name, String description, int value, int count, String picturePath){
     _name = name;
     _description = description;
     _value = value;
-    _picture = picture;
+    _count = count;
+    _picturePath = picturePath;
   }
 
   int get value => _value;
