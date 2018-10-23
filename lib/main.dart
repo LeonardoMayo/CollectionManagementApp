@@ -6,6 +6,7 @@ import 'collection.dart';
 import 'collection_ui.dart';
 import 'item_ui.dart';
 import 'dart:io';
+import 'persistence.dart';
 
 void main() => runApp(new MyApp());
 
@@ -30,55 +31,66 @@ class StartPage extends StatefulWidget {
   final String title;
 
   @override
-  _StartPageState createState() => new _StartPageState();
+  StartPageState createState() => new StartPageState();
 }
 
-class _StartPageState extends State<StartPage> {
+class StartPageState extends State<StartPage> {
   List<Collection> _savedCollections = new List<Collection>();
 
   CollectionUI collectionUI = new CollectionUI();
   ItemUI itemUI = new ItemUI();
+  Persistence persistence;
 
   FloatingActionButton addButton;
 
-
   String filePath;
+  String directFilePath = "/data/user/0/jpl.software.collectionmanagement/files/";
+  File appPersistenceManager;
 
   @override
-  initState(){
+  initState() {
+
+    persistence = Persistence(this);
+
     super.initState();
 
     setFilePath();
 //    if (_savedCollections.length == 0) {
 //      _loadCollectionsOnStartup();
 //    }
-    loadAppManagementFile();
+//    loadAppManagementFile();
+    _savedCollections = persistence.loadedCollections;
   }
 
   @override
-  dispose(){
+  dispose() {
     super.dispose();
   }
 
-  void loadAppManagementFile() async{
+  void loadAppManagementFile() async {
     File file = await _collectionManagementFile;
 
-    file.readAsLines().then((List<String> data){
-      setState(() {
-
-        for(int i = 0; i < data.length; i++){
-          _loadCollectionFromFile(data[i]);
-        }
-
+    if (file == null) {
+      final path = await _localPath;
+      file = new File("$path/appmanager.txt");
+      appPersistenceManager = file;
+    } else {
+      appPersistenceManager = file;
+      file.readAsLines().then((List<String> data) {
+        setState(() {
+          for (int i = 0; i < data.length; i++) {
+            _loadCollectionFromFile(data[i]);
+          }
+        });
       });
-    });
+    }
 
+    print(appPersistenceManager.toString());
   }
 
   ///Build Method, most important
   @override
   Widget build(BuildContext context) {
-
     addButton = FloatingActionButton(
       onPressed: _newCollection,
       tooltip: 'New Collection',
@@ -92,39 +104,39 @@ class _StartPageState extends State<StartPage> {
         body: _buildCollectionListView(),
         drawer: new Drawer(
             child: new ListView(
-              children: <Widget>[
-                new DrawerHeader(
-                  child: new Text('Header'),
-                  decoration: ShapeDecoration(
-                    shape: CircleBorder(),
-                    color: Colors.black,
-                  ),
-                ),
-                new ListTile(
-                  title: new Text('First Menu Item'),
-                  onTap: () {
-                    Navigator.pop(context);
-                  },
-                ),
-                new ListTile(
-                  title: new Text('Second Menu Item'),
-                  onTap: () {
-                    Navigator.pop(context);
-                  },
-                ),
-                new Divider(),
-                new ListTile(
-                  title: new Text('About'),
-                  onTap: () {
-                    Navigator.pop(context);
-                  },
-                ),
-              ],
-            )),
+          children: <Widget>[
+            new DrawerHeader(
+              child: new Text('Header'),
+              decoration: ShapeDecoration(
+                shape: CircleBorder(),
+                color: Colors.black,
+              ),
+            ),
+            new ListTile(
+              title: new Text('First Menu Item'),
+              onTap: () {
+                Navigator.pop(context);
+              },
+            ),
+            new ListTile(
+              title: new Text('Second Menu Item'),
+              onTap: () {
+                Navigator.pop(context);
+              },
+            ),
+            new Divider(),
+            new ListTile(
+              title: new Text('About'),
+              onTap: () {
+                Navigator.pop(context);
+              },
+            ),
+          ],
+        )),
         floatingActionButton: Theme(
           data: Theme.of(context).copyWith(accentColor: Colors.yellow),
           child:
-          addButton, // This trailing comma makes auto-formatting nicer for build methods.
+              addButton, // This trailing comma makes auto-formatting nicer for build methods.
         ));
   }
 
@@ -135,8 +147,8 @@ class _StartPageState extends State<StartPage> {
         "Test Collection1",
         "More blabla",
         [
-          new CollectionItem("Item11", "blablubb", 2, 1,null),
-          new CollectionItem("Item21", "blubbBla", 3, 1,null)
+          new CollectionItem("Item11", "blablubb", 2, 1, null),
+          new CollectionItem("Item21", "blubbBla", 3, 1, null)
         ],
         "EUR");
 
@@ -144,8 +156,8 @@ class _StartPageState extends State<StartPage> {
         "Test Collection2",
         "More blabla",
         [
-          new CollectionItem("Item12", "blablubb", 2, 1,null),
-          new CollectionItem("Item22", "blubbBla", 3, 1,null)
+          new CollectionItem("Item12", "blablubb", 2, 1, null),
+          new CollectionItem("Item22", "blubbBla", 3, 1, null)
         ],
         "USD");
 
@@ -164,9 +176,9 @@ class _StartPageState extends State<StartPage> {
 //    }
   }
 
-  void _loadCollectionFromFile( String fileName){
+  void _loadCollectionFromFile(String fileName) {
     String currentPath = filePath + fileName;
-    print( currentPath);
+    print(currentPath);
 
     File file = File(currentPath);
     file.readAsLines().then((List<String> lines) {
@@ -177,7 +189,7 @@ class _StartPageState extends State<StartPage> {
       description = lines[1];
       currency = lines[2];
 
-      for(int i = 3; i < lines.length; i++){
+      for (int i = 3; i < lines.length; i++) {
         List<String> contents = lines[i].split(";");
 
         String itemName, itemDesc, itemPicPath;
@@ -189,11 +201,12 @@ class _StartPageState extends State<StartPage> {
         itemCount = int.parse(contents[3]);
         itemPicPath = contents[4];
 
-        savedItems.add(CollectionItem(itemName, itemDesc, itemValue, itemCount, itemPicPath));
+        savedItems.add(CollectionItem(
+            itemName, itemDesc, itemValue, itemCount, itemPicPath));
       }
 
-      _savedCollections.add(Collection(name, description, savedItems, currency));
-
+      _savedCollections
+          .add(Collection(name, description, savedItems, currency));
     });
   }
 
@@ -240,7 +253,9 @@ class _StartPageState extends State<StartPage> {
                     return collectionHeader;
                   } else {
                     return new GestureDetector(
-                        onTap: () {_openItem(collection.savedItems[i - 1]);},
+                        onTap: () {
+                          _openItem(collection.savedItems[i - 1]);
+                        },
                         onLongPress: () {
                           confirmToDeleteItem(collection.savedItems[i - 1]);
                         },
@@ -254,7 +269,7 @@ class _StartPageState extends State<StartPage> {
                                   children: [
                                     Container(
                                       padding:
-                                      const EdgeInsets.only(bottom: 8.0),
+                                          const EdgeInsets.only(bottom: 8.0),
                                       child: Text(
                                         collection.savedItems[i - 1].name,
                                         style: TextStyle(
@@ -328,7 +343,7 @@ class _StartPageState extends State<StartPage> {
       title: new Text("Are you sure?"),
       content: new Center(
           child:
-          new Text("Are you sure you want to delete " + item.name + "?")),
+              new Text("Are you sure you want to delete " + item.name + "?")),
       actions: <Widget>[
         new RaisedButton(
           child: new Text("Yes"),
@@ -353,9 +368,9 @@ class _StartPageState extends State<StartPage> {
             ),
             body: new ListView(children: [
               spaceDivider(),
-              nameWidget("Collection name"),
+              nameWidget("Collection name", newCollectionNameController),
               spaceDivider(),
-              descriptionWidget("Collection description"),
+              descriptionWidget("Collection description", newCollectionDescController),
               spaceDivider(),
               Container(
                 padding: EdgeInsets.only(
@@ -445,8 +460,13 @@ class _StartPageState extends State<StartPage> {
   }
 
   void addCollection() {
+    String currency;
+    switch(_radioValue){
+      case 0: currency = "USD"; break;
+      case 1: currency = "EUR"; break;
+    }
     Collection collection = new Collection(newCollectionNameController.text,
-        newCollectionDescController.text, new List<CollectionItem>(), "");
+        newCollectionDescController.text, new List<CollectionItem>(), currency);
     _savedCollections.add(collection);
     leaveScreen();
 
@@ -461,8 +481,8 @@ class _StartPageState extends State<StartPage> {
 
   ///Methods for displaying the Making of a new Item
   void _newItem() {
-    Widget itemNameWidget = nameWidget("Item name");
-    Widget itemDescriptionWidget = descriptionWidget("Item description");
+    Widget itemNameWidget = nameWidget("Item name", newItemNameCntrl);
+    Widget itemDescriptionWidget = descriptionWidget("Item description", newItemDescCntrl);
     Widget itemValueWidget = valueWidget("Item value", "");
     Widget itemCountWidget = countWidget("Item count", "");
     Widget itemFotoWidget = photoWidget(null);
@@ -471,7 +491,7 @@ class _StartPageState extends State<StartPage> {
       new MaterialPageRoute<void>(
         builder: (BuildContext context) {
           return new Scaffold(
-            // Add 6 lines from here...
+              // Add 6 lines from here...
               appBar: new AppBar(
                 title: Text('New Item'),
               ),
@@ -504,7 +524,7 @@ class _StartPageState extends State<StartPage> {
     int value = int.parse(newItemValueCntrl.text);
     int count = int.parse(newItemCountCntrl.text);
     CollectionItem item = new CollectionItem(
-        newItemNameCntrl.text, newItemDescCntrl.text, value,count, null);
+        newItemNameCntrl.text, newItemDescCntrl.text, value, count, null);
     currentCollection.addItem(item);
     writeItemIntoCollectionFile(currentCollection, item);
     leaveScreen();
@@ -529,7 +549,7 @@ class _StartPageState extends State<StartPage> {
   }
 
   ///Multiple usable Widgets
-  Widget nameWidget(String text) {
+  Widget nameWidget(String text, TextEditingController controller) {
     return Row(
       children: <Widget>[
         Expanded(
@@ -541,14 +561,14 @@ class _StartPageState extends State<StartPage> {
                 decoration: BoxDecoration(
                     color: Colors.grey[800],
                     borderRadius:
-                    new BorderRadius.all(new Radius.circular(18.0)),
+                        new BorderRadius.all(new Radius.circular(18.0)),
                     border: Border.all(
                       color: Colors.grey,
                       width: 3.0,
                       style: BorderStyle.solid,
                     )),
                 child: new TextField(
-                  controller: newItemNameCntrl,
+                  controller: controller,
                   decoration: InputDecoration(
                     border: InputBorder.none,
                     hintText: text,
@@ -562,7 +582,7 @@ class _StartPageState extends State<StartPage> {
     );
   }
 
-  Widget descriptionWidget(String text) {
+  Widget descriptionWidget(String text, TextEditingController controller) {
     return Row(
       children: <Widget>[
         Expanded(
@@ -584,7 +604,7 @@ class _StartPageState extends State<StartPage> {
                       style: BorderStyle.solid,
                     )),
                 child: TextField(
-                  controller: newItemDescCntrl,
+                  controller: controller,
                   decoration: InputDecoration(
                     border: InputBorder.none,
                     hintText: text,
@@ -609,7 +629,7 @@ class _StartPageState extends State<StartPage> {
                 decoration: BoxDecoration(
                     color: Colors.grey[800],
                     borderRadius:
-                    new BorderRadius.all(new Radius.circular(18.0)),
+                        new BorderRadius.all(new Radius.circular(18.0)),
                     border: Border.all(
                       color: Colors.grey,
                       width: 3.0,
@@ -669,7 +689,7 @@ class _StartPageState extends State<StartPage> {
                 decoration: BoxDecoration(
                     color: Colors.grey[800],
                     borderRadius:
-                    new BorderRadius.all(new Radius.circular(18.0)),
+                        new BorderRadius.all(new Radius.circular(18.0)),
                     border: Border.all(
                       color: Colors.grey,
                       width: 3.0,
@@ -779,19 +799,17 @@ class _StartPageState extends State<StartPage> {
 
   ///Methods for Item Details screen
   void _openItem(CollectionItem item) {
-
     Widget body = Container();
-    Navigator.of(context).push(
-        new MaterialPageRoute<void>(
-            builder: (BuildContext context) {
-              return new Scaffold(
-                // Add 6 lines from here...
-                appBar: new AppBar(
-                  title: Text(item.name),
-                ),
-                body: spaceDivider(),
-              );
-            }));
+    Navigator.of(context)
+        .push(new MaterialPageRoute<void>(builder: (BuildContext context) {
+      return new Scaffold(
+        // Add 6 lines from here...
+        appBar: new AppBar(
+          title: Text(item.name),
+        ),
+        body: spaceDivider(),
+      );
+    }));
   }
 
   ///Persistence Methods
@@ -806,7 +824,6 @@ class _StartPageState extends State<StartPage> {
     String result = rawPath.path + "/collections/";
 
     filePath = result;
-
   }
 
   bool doesTestFileExist() {
@@ -836,16 +853,17 @@ class _StartPageState extends State<StartPage> {
     }
   }
 
-  File _getCorrectFile(String name){
-    final path = filePath + name;
+  File _getCorrectFile(String name) {
+    final path = filePath +""+ name;
     try {
       return new File(path);
-    } catch(e){
-
+    } catch (e) {
+      return null;
     }
   }
 
   void writeCollection(Collection collection) async {
+    print(collection.name);
     final file = _getCorrectFile(collection.name);
 
     String name = collection.name;
@@ -855,8 +873,13 @@ class _StartPageState extends State<StartPage> {
     List<String> sItems = new List<String>();
     for (int i = 0; i < collection.savedItems.length; i++) {
       CollectionItem item = collection.savedItems[i];
-      String result =
-          item.name + ";" + item.description + ";" + item.value.toString() +";"+item.count.toString();
+      String result = item.name +
+          ";" +
+          item.description +
+          ";" +
+          item.value.toString() +
+          ";" +
+          item.count.toString();
       sItems.add(result);
     }
 
@@ -873,15 +896,25 @@ class _StartPageState extends State<StartPage> {
     sink.close();
   }
 
-  void writeItemIntoCollectionFile(Collection collection, CollectionItem item) async {
+  void writeItemIntoCollectionFile(
+      Collection collection, CollectionItem item) async {
     final file = _getCorrectFile(collection.name);
 
-    String result = item.name + ";" + item.description + ";" + item.value.toString() +";"+item.count.toString();
+    String result = item.name +
+        ";" +
+        item.description +
+        ";" +
+        item.value.toString() +
+        ";" +
+        item.count.toString();
     var sink = file.openWrite();
 
     sink.writeln(result);
 
     sink.close();
+  }
+
+  void writeCollectionNameIntoManagementFile(String name){
 
   }
 
@@ -903,8 +936,8 @@ class _StartPageState extends State<StartPage> {
       for (int i = 2; i < contents.length; i++) {
         String sItem = contents[i];
         List<String> sItemParts = sItem.split(';');
-        CollectionItem item = new CollectionItem(
-            sItemParts[0], sItemParts[1], int.parse(sItemParts[2]),int.parse(sItemParts[3]), null);
+        CollectionItem item = new CollectionItem(sItemParts[0], sItemParts[1],
+            int.parse(sItemParts[2]), int.parse(sItemParts[3]), null);
 
         loadedItems.add(item);
       }
