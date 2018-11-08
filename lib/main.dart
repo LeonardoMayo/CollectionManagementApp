@@ -73,7 +73,7 @@ class StartPageState extends State<StartPage> {
     addButton = FloatingActionButton(
       onPressed: _newCollection,
       tooltip: 'New Collection',
-      child: new Icon(Icons.add),
+      child: new Icon(Icons.add, color: Colors.black,),
     );
 
     return new Scaffold(
@@ -214,7 +214,8 @@ class StartPageState extends State<StartPage> {
               child: new FloatingActionButton(
                 onPressed: _newItem,
                 tooltip: 'New Item',
-                child: new Icon(Icons.add),
+                child: new Icon(Icons.add,
+                    color: Colors.black),
               ),
             ), // ... to here.
           );
@@ -299,7 +300,7 @@ class StartPageState extends State<StartPage> {
                 tooltip: 'New Item',
                 child: new Icon(
                   Icons.check,
-                  color: Colors.grey[800],
+                  color: Colors.black,
                 ),
               ),
             ),
@@ -363,10 +364,9 @@ class StartPageState extends State<StartPage> {
   int _radioValue;
 
   _handleCurrencyRadioValueChange(dynamic value) {
-    setState(() {
-      print(value.toString());
-      _radioValue = value;
-    });
+    print(value.toString());
+    _radioValue = value;
+    setState(() {});
   }
 
   void addCollection() {
@@ -415,14 +415,15 @@ class StartPageState extends State<StartPage> {
                 creationUI.spaceDivider(),
                 itemCountWidget,
                 creationUI.spaceDivider(),
-                itemFotoWidget,
+//                itemFotoWidget,
               ]),
               floatingActionButton: Theme(
                 data: Theme.of(context).copyWith(accentColor: Colors.yellow),
                 child: new FloatingActionButton(
                   onPressed: addItem,
                   tooltip: 'New Item',
-                  child: new Icon(Icons.check),
+                  child: new Icon(Icons.check,
+                      color: Colors.black),
                 ),
               ));
         },

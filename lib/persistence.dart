@@ -3,8 +3,11 @@ import 'package:path_provider/path_provider.dart';
 import 'dart:async';
 import 'dart:io';
 import 'collection.dart';
+import 'logger.dart';
 
 class Persistence {
+
+  Logger logger;
 
   ///Class fields
   StartPageState homePage;
@@ -17,11 +20,11 @@ class Persistence {
   Persistence(StartPageState startPage) {
     homePage = startPage;
 
+    logger = new Logger("Persistence");
+
     loadedCollections = List<Collection>();
 
     setAppPath();
-//    setFilePath();
-//    loadAppManagementFile();
   }
 
   Future<String> get _localPath async {
@@ -31,21 +34,17 @@ class Persistence {
   }
 
   void setAppPath() async {
-//    appPath = "/data/user/0/jpl.software.collectionmanagement/files";
     getApplicationDocumentsDirectory().then((Directory dir){
       dir.createSync();
       appPath = dir.path;
       Directory collectionDir = new Directory(appPath + "/collections/");
-      collectionDir.createSync();
+      collectionDir.createSync(recursive: true);
+      print(collectionDir.path);
       String result = appPath + "/collections/";
 
       filePath = collectionDir.path;
       loadAppManagementFile();
     });
-//    appPath = path.path;
-//    String result = appPath + "/collections/";
-//
-//    filePath = result;
   }
 
   void setFilePath() async {
@@ -56,21 +55,46 @@ class Persistence {
 
   //TODO find Error that prevents loading
   void loadAppManagementFile() async {
-    File file = await _collectionManagementFile;
+    logger.log("loadAppManagementFile() Method");
 
-    if (file == null) {
-      final path = await _localPath;
-      file = new File("$path/appmanager.txt");
-      managementFile = file;
-    } else {
-      managementFile = file;
-      file.readAsLines().then((List<String> data) {
-        loadAllKnownCollections(data);
-      });
-    }
+    File file;
+    File(appPath+"/appmanager.txt").exists().then((bool exists){
+      logger.log("File "+exists.toString());
+      if (exists){
+        //return file
+        file = File(appPath+"/appmanager.txt");
+        managementFile = file;
+        file.readAsLines().then((List<String> data) {
+          loadAllKnownCollections(data);
+        });
+      } else {
+        //create and return file
+        File(appPath+"/appmanager.txt").create().then((File createdFile){
+          file = createdFile;
+          managementFile = file;
+          file.readAsLines().then((List<String> data) {
+            loadAllKnownCollections(data);
+          });
+        });
+      }
+    });
+    logger.log(file.toString());
+
+
+//    if (file == null) {
+//      final path = await _localPath;
+//      file = new File("$path/appmanager.txt");
+//      managementFile = file;
+//    } else {
+//      managementFile = file;
+//      file.readAsLines().then((List<String> data) {
+//        loadAllKnownCollections(data);
+//      });
+//    }
   }
 
   void loadAllKnownCollections(List<String> data) {
+    logger.log("loadAllKnownCollections Method with List<String> "+ data.toString());
     for (int i = 0; i < data.length; i++) {
       loadedCollections.add(_loadCollectionFromFile(data[i]));
     }
@@ -111,35 +135,39 @@ class Persistence {
     return null;
   }
 
-//  bool doesTestFileExist() {
-//    File file;
-//    _localFile.then((File value) {
-//      file = value;
-//    });
-//    bool result;
-//    file.exists().then((bool value) {
-//      result = value;
-//    });
-//    return result;
-//  }
-
   Future<File> get _localFile async {
     final path = await _localPath;
     return File('$path/collectiontest.txt');
   }
 
-  Future<File> get _collectionManagementFile async {
-    final path = appPath;
-    try {
-      return File("$path/appmanager.txt");
-    } catch (e) {
-      File file;
-      new File("$path/appmanager.txt").create().then((File readFile){
-        file = readFile;
-        managementFile = readFile;
-      });
-      return file;
-    }
+  File get _collectionManagementFile {
+    logger.log("get _collectionManagementFile Method");
+//    try {
+       File file;
+       File(appPath+"/appmanager.txt").exists().then((bool exists){
+         logger.log("File "+exists.toString());
+         if (exists){
+           //return file
+            file = File(appPath+"/appmanager.txt");
+         } else {
+           //create and return file
+           File(appPath+"/appmanager.txt").create().then((File createdFile){
+             file = createdFile;
+           });
+         }
+         return file;
+       });
+       return file;
+//       return file;
+//    } catch (e) {
+//      logger.logError(e.toString());
+//      File file;
+//      new File("$appPath/appmanager.txt").create().then((File readFile){
+//        file = readFile;
+//        managementFile = readFile;
+//      });
+//      return file;
+//    }
   }
 
   File _getCorrectFile(String name) {
@@ -209,35 +237,4 @@ class Persistence {
       sink.close();
     }
   }
-
-//  Future<Collection> readCollection() async {
-//    try {
-//      final file = await _localFile;
-//
-//      // Read the file
-//      List<String> contents = await file.readAsLines();
-//
-//      String name = "";
-//      String description = "";
-//      List<CollectionItem> loadedItems = new List<CollectionItem>();
-//      String currency = "";
-//
-//      name = contents[0];
-//      description = contents[1];
-//
-//      for (int i = 2; i < contents.length; i++) {
-//        String sItem = contents[i];
-//        List<String> sItemParts = sItem.split(';');
-//        CollectionItem item = new CollectionItem(sItemParts[0], sItemParts[1],
-//            int.parse(sItemParts[2]), int.parse(sItemParts[3]), null);
-//
-//        loadedItems.add(item);
-//      }
-//
-//      return new Collection(name, description, loadedItems, currency);
-//    } catch (e) {
-//      // If we encounter an error, return 0
-//      return null;
-//    }
-//  }
 }
