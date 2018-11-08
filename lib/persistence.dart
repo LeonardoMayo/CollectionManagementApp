@@ -11,6 +11,7 @@ class Persistence {
   String appPath;
   String filePath;
   File managementFile;
+  List<File> files;
   List<Collection> loadedCollections;
 
   Persistence(StartPageState startPage) {
@@ -19,8 +20,8 @@ class Persistence {
     loadedCollections = List<Collection>();
 
     setAppPath();
-    setFilePath();
-    loadAppManagementFile();
+//    setFilePath();
+//    loadAppManagementFile();
   }
 
   Future<String> get _localPath async {
@@ -29,16 +30,31 @@ class Persistence {
     return directory.path;
   }
 
-  void setAppPath() {
-    appPath = "/data/user/0/jpl.software.collectionmanagement/files";
+  void setAppPath() async {
+//    appPath = "/data/user/0/jpl.software.collectionmanagement/files";
+    getApplicationDocumentsDirectory().then((Directory dir){
+      dir.createSync();
+      appPath = dir.path;
+      Directory collectionDir = new Directory(appPath + "/collections/");
+      collectionDir.createSync();
+      String result = appPath + "/collections/";
+
+      filePath = collectionDir.path;
+      loadAppManagementFile();
+    });
+//    appPath = path.path;
+//    String result = appPath + "/collections/";
+//
+//    filePath = result;
   }
 
-  void setFilePath() {
+  void setFilePath() async {
     String result = appPath + "/collections/";
 
     filePath = result;
   }
 
+  //TODO find Error that prevents loading
   void loadAppManagementFile() async {
     File file = await _collectionManagementFile;
 
@@ -117,7 +133,11 @@ class Persistence {
     try {
       return File("$path/appmanager.txt");
     } catch (e) {
-      File file = new File("$path/appmanager.txt");
+      File file;
+      new File("$path/appmanager.txt").create().then((File readFile){
+        file = readFile;
+        managementFile = readFile;
+      });
       return file;
     }
   }

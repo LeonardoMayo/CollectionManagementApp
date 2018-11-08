@@ -38,9 +38,8 @@ class StartPage extends StatefulWidget {
 class StartPageState extends State<StartPage> {
   List<Collection> _savedCollections = new List<Collection>();
 
-  CollectionUI collectionUI = new CollectionUI();
-  ItemUI itemUI = new ItemUI();
-
+  CollectionUI collectionUI ;
+  ItemUI itemUI ;
   Persistence persistence;
   CreationUI creationUI;
 
@@ -55,7 +54,8 @@ class StartPageState extends State<StartPage> {
 
     persistence = Persistence(this);
     creationUI = CreationUI(this);
-
+    collectionUI = CollectionUI();
+    itemUI = ItemUI();
 
     super.initState();
 
