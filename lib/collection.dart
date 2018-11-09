@@ -38,6 +38,15 @@ class Collection {
     return null;
   }
 
+  @override
+  String toString(){
+    String result;
+
+    result = this.name +", "+this.description+", "+this.currency+", "+this.savedItems.length.toString();
+
+    return result;
+  }
+
   String get name => _name;
 
   set name(String value) {

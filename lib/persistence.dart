@@ -6,7 +6,6 @@ import 'collection.dart';
 import 'logger.dart';
 
 class Persistence {
-
   Logger logger;
 
   ///Class fields
@@ -16,6 +15,7 @@ class Persistence {
   File managementFile;
   List<File> files;
   List<Collection> loadedCollections;
+  bool isLoaded;
 
   Persistence(StartPageState startPage) {
     homePage = startPage;
@@ -33,8 +33,8 @@ class Persistence {
     return directory.path;
   }
 
-  void setAppPath() async {
-    getApplicationDocumentsDirectory().then((Directory dir){
+  void setAppPath() {
+    getApplicationDocumentsDirectory().then((Directory dir) {
       dir.createSync();
       appPath = dir.path;
       Directory collectionDir = new Directory(appPath + "/collections/");
@@ -53,56 +53,48 @@ class Persistence {
     filePath = result;
   }
 
-  //TODO find Error that prevents loading
-  void loadAppManagementFile() async {
+  void loadAppManagementFile() {
     logger.log("loadAppManagementFile() Method");
 
     File file;
-    File(appPath+"/appmanager.txt").exists().then((bool exists){
-      logger.log("File "+exists.toString());
-      if (exists){
+    File(appPath + "/appmanager.txt").exists().then((bool exists) {
+      logger.log("File " + exists.toString());
+      if (exists) {
         //return file
-        file = File(appPath+"/appmanager.txt");
+        file = File(appPath + "/appmanager.txt");
         managementFile = file;
         file.readAsLines().then((List<String> data) {
           loadAllKnownCollections(data);
         });
       } else {
         //create and return file
-        File(appPath+"/appmanager.txt").create().then((File createdFile){
+        File(appPath + "/appmanager.txt").create().then((File createdFile) {
           file = createdFile;
+          var sink = file.openWrite();
+          sink.close();
           managementFile = file;
-          file.readAsLines().then((List<String> data) {
-            loadAllKnownCollections(data);
-          });
+//          file.readAsLines().then((List<String> data) {
+//            loadAllKnownCollections(data);
+//          });
         });
       }
     });
-    logger.log(file.toString());
-
-
-//    if (file == null) {
-//      final path = await _localPath;
-//      file = new File("$path/appmanager.txt");
-//      managementFile = file;
-//    } else {
-//      managementFile = file;
-//      file.readAsLines().then((List<String> data) {
-//        loadAllKnownCollections(data);
-//      });
-//    }
   }
 
   void loadAllKnownCollections(List<String> data) {
-    logger.log("loadAllKnownCollections Method with List<String> "+ data.toString());
+    logger.log(
+        "loadAllKnownCollections Method with List<String> " + data.toString());
     for (int i = 0; i < data.length; i++) {
-      loadedCollections.add(_loadCollectionFromFile(data[i]));
+      _loadCollectionFromFile(data[i]);
     }
+    isLoaded = true;
+    logger.log(loadedCollections.toString());
   }
 
-  Collection _loadCollectionFromFile(String fileName) {
-    String currentPath = filePath + fileName;
-    print(currentPath);
+  void _loadCollectionFromFile(String fileName) {
+
+    logger.logM("_loadCollectionFromFile", String, fileName);
+    String currentPath = filePath + fileName+".txt";
 
     File file = File(currentPath);
     file.readAsLines().then((List<String> lines) {
@@ -128,11 +120,13 @@ class Persistence {
         savedItems.add(CollectionItem(
             itemName, itemDesc, itemValue, itemCount, itemPicPath));
       }
-
-      return Collection(name, description, savedItems, currency);
+      Collection collection = Collection(name, description, savedItems, currency);
+      logger.log(collection.toString());
+//      return collection;
+      loadedCollections.add(collection);
     });
 
-    return null;
+//    return null;
   }
 
   Future<File> get _localFile async {
@@ -140,38 +134,8 @@ class Persistence {
     return File('$path/collectiontest.txt');
   }
 
-  File get _collectionManagementFile {
-    logger.log("get _collectionManagementFile Method");
-//    try {
-       File file;
-       File(appPath+"/appmanager.txt").exists().then((bool exists){
-         logger.log("File "+exists.toString());
-         if (exists){
-           //return file
-            file = File(appPath+"/appmanager.txt");
-         } else {
-           //create and return file
-           File(appPath+"/appmanager.txt").create().then((File createdFile){
-             file = createdFile;
-           });
-         }
-         return file;
-       });
-       return file;
-//       return file;
-//    } catch (e) {
-//      logger.logError(e.toString());
-//      File file;
-//      new File("$appPath/appmanager.txt").create().then((File readFile){
-//        file = readFile;
-//        managementFile = readFile;
-//      });
-//      return file;
-//    }
-  }
-
   File _getCorrectFile(String name) {
-    final path = filePath + "" + name +".txt";
+    final path = filePath + "" + name + ".txt";
     try {
       return new File(path);
     } catch (e) {
@@ -179,6 +143,57 @@ class Persistence {
     }
   }
 
+  void createNewCollectionFile(Collection collection) {
+    logger.log("createNewCollectionFile Method with Collection " +
+        collection.toString());
+
+    String name = collection.name;
+    String description = collection.description;
+    String currency = collection.currency;
+
+    File file = File(filePath + name + ".txt");
+    logger.log(file.path);
+    var sink = file.openWrite();
+
+    sink.writeln(name);
+    sink.writeln(description);
+    sink.writeln(currency);
+
+    sink.close();
+    writeCollectionNameIntoManagementFile(name);
+  }
+
+  void writeItemIntoCollectionFile(
+      Collection collection, CollectionItem item) async {
+    logger.log("writeItemIntoCollectionFile Method with Collection "+collection.toString()+"and Item "+item.toString());
+    final file = _getCorrectFile(collection.name);
+
+    String result = item.name +
+        ";" +
+        item.description +
+        ";" +
+        item.value.toString() +
+        ";" +
+        item.count.toString();
+    var sink = file.openWrite();
+
+    sink.writeln(result);
+
+    sink.close();
+  }
+
+  void writeCollectionNameIntoManagementFile(String name) {
+    logger.log("writeCollectionNameIntoManagementFile Method with String "+name);
+    if (name != null && name != "") {
+      var sink = managementFile.openWrite();
+      sink.writeln(name);
+      sink.close();
+
+      logger.log(managementFile.readAsStringSync());
+    }
+  }
+
+  ///Base Method
   void writeCollection(Collection collection) async {
     final file = _getCorrectFile(collection.name);
 
@@ -210,31 +225,5 @@ class Persistence {
     }
 
     sink.close();
-  }
-
-  void writeItemIntoCollectionFile(
-      Collection collection, CollectionItem item) async {
-    final file = _getCorrectFile(collection.name);
-
-    String result = item.name +
-        ";" +
-        item.description +
-        ";" +
-        item.value.toString() +
-        ";" +
-        item.count.toString();
-    var sink = file.openWrite();
-
-    sink.writeln(result);
-
-    sink.close();
-  }
-
-  void writeCollectionNameIntoManagementFile(String name) {
-    if (name != null && name != ""){
-      var sink = managementFile.openWrite();
-      sink.writeln(name);
-      sink.close();
-    }
   }
 }

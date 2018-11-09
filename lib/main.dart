@@ -8,6 +8,7 @@ import 'item_ui.dart';
 import 'dart:io';
 import 'persistence.dart';
 import 'creation-ui.dart';
+import "logger.dart";
 
 void main() => runApp(new MyApp());
 
@@ -36,13 +37,13 @@ class StartPage extends StatefulWidget {
 }
 
 class StartPageState extends State<StartPage> {
-  List<Collection> _savedCollections = new List<Collection>();
+  List<Collection> savedCollections = new List<Collection>();
 
   CollectionUI collectionUI ;
   ItemUI itemUI ;
   Persistence persistence;
   CreationUI creationUI;
-
+  Logger logger;
   FloatingActionButton addButton;
 
 
@@ -51,15 +52,18 @@ class StartPageState extends State<StartPage> {
 
   @override
   initState() {
-
     persistence = Persistence(this);
+    logger = Logger("StartPageState");
     creationUI = CreationUI(this);
     collectionUI = CollectionUI();
     itemUI = ItemUI();
 
-    super.initState();
+    setState(() {
+      savedCollections = persistence.loadedCollections;
+    });
 
-    _savedCollections = persistence.loadedCollections;
+    super.initState();
+    logger.log("initState Method");
   }
 
   @override
@@ -70,6 +74,7 @@ class StartPageState extends State<StartPage> {
   ///Build Method, most important
   @override
   Widget build(BuildContext context) {
+    logger.logM("build", BuildContext, context);
     addButton = FloatingActionButton(
       onPressed: _newCollection,
       tooltip: 'New Collection',
@@ -225,18 +230,22 @@ class StartPageState extends State<StartPage> {
   }
 
   Widget _buildCollectionListView() {
-    if (_savedCollections.length != 0) {
+    setState(() {
+      savedCollections = persistence.loadedCollections;
+    });
+    if (savedCollections.length != 0 && savedCollections != null) {
+      logger.log("_buildCollectionListView Method with "+savedCollections.toString());
       return ListView.builder(
         padding: const EdgeInsets.all(16.0),
         itemBuilder: (context, i) {
-          if (i < _savedCollections.length) {
+          if (i < savedCollections.length && savedCollections[i] != null) {
             return ListTile(
               title: Text(
-                _savedCollections[i].name,
+                savedCollections[i].name,
                 style: TextStyle(fontSize: 18.0),
               ),
               onTap: () {
-                _openCollection(_savedCollections[i]);
+                _openCollection(savedCollections[i]);
               },
             );
           }
@@ -377,10 +386,11 @@ class StartPageState extends State<StartPage> {
     }
     Collection collection = new Collection(newCollectionNameController.text,
         newCollectionDescController.text, new List<CollectionItem>(), currency);
-    _savedCollections.add(collection);
+    savedCollections.add(collection);
     leaveScreen();
 
-    persistence.writeCollection(collection);
+    persistence.createNewCollectionFile(collection);
+//    persistence.writeCollection(collection);
   }
 
   final newItemNameCntrl = TextEditingController();
