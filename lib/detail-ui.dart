@@ -116,29 +116,36 @@ class DetailUI {
   }
 
   Widget itemValueField(int value, Icon currency) {
-    return Center(
+
+    return Container(
+      padding: const EdgeInsets.all(32.0),
       child: Row(
         children: <Widget>[
-          Text(
-            value.toString(),
+          Expanded(child:
+            Text(value.toString(),
+              style: TextStyle(fontSize: 20.0,),
+              textAlign: TextAlign.center,
+            ),
           ),
-          createStuffUI.valueWidgetIcon(
-              homePage.currentlyOpenCollection.currency, 40.0),
-        ],
-      ),
+          Expanded(child: createStuffUI.valueWidgetIcon(
+              homePage.currentlyOpenCollection.currency, 40.0),),
+        ],),
     );
   }
 
   Widget itemCountField(int value) {
-    return Center(
+    return Container(
+      padding: const EdgeInsets.all(32.0),
       child: Row(
         children: <Widget>[
-          Text(
-            value.toString(),
+          Expanded(child:
+          Text(value.toString(),
+            style: TextStyle(fontSize: 20.0),
+            textAlign: TextAlign.center,
           ),
-          createStuffUI.countWidgetIcon(40.0),
-        ],
-      ),
+          ),
+          Expanded(child: createStuffUI.countWidgetIcon(40.0),),
+        ],),
     );
   }
 }
