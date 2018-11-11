@@ -11,7 +11,7 @@ class Logger {
   }
 
   void logM(String method, Object argumentType,Object arguments){
-    String result = method + "Method";
+    String result = _className +": "+ method + " Method";
     if (argumentType != null){
       result = result + " with " + argumentType.toString() +" "+ arguments.toString();
     }

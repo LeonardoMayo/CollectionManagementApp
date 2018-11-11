@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import 'collection.dart';
 import 'main.dart';
 
-class CreationUI{
+class CreateStuffUI{
 
   StartPageState homePage;
 
-  CreationUI(StartPageState startPage){
+  CreateStuffUI(StartPageState startPage){
     homePage = startPage;
   }
 
@@ -262,7 +262,17 @@ class CreationUI{
   Widget spaceDivider() {
     return SizedBox(
       height: 20.0,
-      width: 100.0,
+      width: 20.0,
+    );
+  }
+
+  countWidgetIcon(double textsize) {
+    return Container(
+      child: Icon(
+        Icons.dehaze,
+        color: Colors.red,
+        size: textsize,
+      ),
     );
   }
 

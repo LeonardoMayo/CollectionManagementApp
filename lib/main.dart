@@ -9,6 +9,8 @@ import 'dart:io';
 import 'persistence.dart';
 import 'creation-ui.dart';
 import "logger.dart";
+import 'detail-ui.dart';
+import 'constants.dart';
 
 void main() => runApp(new MyApp());
 
@@ -39,13 +41,15 @@ class StartPage extends StatefulWidget {
 class StartPageState extends State<StartPage> {
   List<Collection> savedCollections = new List<Collection>();
 
-  CollectionUI collectionUI ;
-  ItemUI itemUI ;
-  Persistence persistence;
-  CreationUI creationUI;
-  Logger logger;
-  FloatingActionButton addButton;
+  CollectionUI collectionUI;
 
+  ItemUI itemUI;
+
+  Persistence persistence;
+  CreateStuffUI createStuffUI;
+  Logger logger;
+  DetailUI detailUI;
+  FloatingActionButton addButton;
 
   //Runtime Vars
   Collection currentlyOpenCollection;
@@ -54,9 +58,10 @@ class StartPageState extends State<StartPage> {
   initState() {
     persistence = Persistence(this);
     logger = Logger("StartPageState");
-    creationUI = CreationUI(this);
+    createStuffUI = CreateStuffUI(this);
     collectionUI = CollectionUI();
     itemUI = ItemUI();
+    detailUI = DetailUI(this);
 
     setState(() {
       savedCollections = persistence.loadedCollections;
@@ -75,82 +80,27 @@ class StartPageState extends State<StartPage> {
   @override
   Widget build(BuildContext context) {
     logger.logM("build", BuildContext, context);
-    addButton = FloatingActionButton(
-      onPressed: _newCollection,
-      tooltip: 'New Collection',
-      child: new Icon(Icons.add, color: Colors.black,),
-    );
 
     return new Scaffold(
         appBar: new AppBar(
           title: new Text(widget.title),
         ),
         body: _buildCollectionListView(),
-        drawer: new Drawer(
-            child: new ListView(
-          children: <Widget>[
-            new DrawerHeader(
-              child: new Text('Header'),
-              decoration: ShapeDecoration(
-                shape: CircleBorder(),
-                color: Colors.black,
-              ),
-            ),
-            new ListTile(
-              title: new Text('First Menu Item'),
-              onTap: () {
-                Navigator.pop(context);
-              },
-            ),
-            new ListTile(
-              title: new Text('Second Menu Item'),
-              onTap: () {
-                Navigator.pop(context);
-              },
-            ),
-            new Divider(),
-            new ListTile(
-              title: new Text('About'),
-              onTap: () {
-                Navigator.pop(context);
-              },
-            ),
-          ],
-        )),
-        floatingActionButton: Theme(
-          data: Theme.of(context).copyWith(accentColor: Colors.yellow),
-          child:
-              addButton, // This trailing comma makes auto-formatting nicer for build methods.
-        ));
+        drawer: detailUI.appDrawer(context),
+        floatingActionButton:
+    Theme(
+    data: Theme.of(context).copyWith(accentColor: Colors.yellow),
+    child: new FloatingActionButton(
+    onPressed: newCollection,
+    child: new Icon(Icons.add, color: Colors.black),
+    ),
+    ), );
   }
 
   ///full with Test Collections atm, will load safed collections from files
   ///Collection Methods
 
   void _openCollection(Collection collection) {
-    Widget collectionHeader = Container(
-      padding: EdgeInsets.all(50.0),
-      decoration: BoxDecoration(
-          color: Colors.grey[800],
-          borderRadius: BorderRadius.circular(5.0),
-          border: Border.all(color: Colors.grey, style: BorderStyle.solid)),
-      child: Column(
-        children: <Widget>[
-          Container(
-            child: Text(
-              collection.name,
-              style: TextStyle(fontSize: 22.0, fontWeight: FontWeight.bold),
-            ),
-          ),
-          Text(
-            collection.description,
-            style: TextStyle(fontSize: 20.0, color: Colors.grey[700]),
-          ),
-          creationUI.spaceDivider()
-        ],
-      ),
-    );
-
     currentlyOpenCollection = collection;
     Navigator.of(context).push(
       new MaterialPageRoute<void>(
@@ -165,7 +115,8 @@ class StartPageState extends State<StartPage> {
                 itemCount: collection.savedItems.length + 1,
                 itemBuilder: (context, i) {
                   if (i == 0) {
-                    return collectionHeader;
+                    return detailUI.headerItem(
+                        collection.name, collection.description);
                   } else {
                     return new GestureDetector(
                         onTap: () {
@@ -203,11 +154,17 @@ class StartPageState extends State<StartPage> {
                                   ],
                                 ),
                               ),
+                              createStuffUI.countWidgetIcon(20.0),
+                              Container(padding: const EdgeInsets.all(1.0),child:
+                              Text(collection.savedItems[i - 1].count.toString(), style: TextStyle(fontSize: 18.0)),
+                              ),
+                              createStuffUI.spaceDivider(),
                               Text(
                                 collection.savedItems[i - 1].value.toString(),
                                 style: TextStyle(fontSize: 18.0),
                               ),
-                              creationUI.valueWidgetIcon(currentlyOpenCollection.currency, 20.0),
+                              createStuffUI.valueWidgetIcon(
+                                  currentlyOpenCollection.currency, 20.0),
                             ],
                           ),
                         ));
@@ -217,10 +174,9 @@ class StartPageState extends State<StartPage> {
             floatingActionButton: Theme(
               data: Theme.of(context).copyWith(accentColor: Colors.yellow),
               child: new FloatingActionButton(
-                onPressed: _newItem,
+                onPressed: newItem,
                 tooltip: 'New Item',
-                child: new Icon(Icons.add,
-                    color: Colors.black),
+                child: new Icon(Icons.add, color: Colors.black),
               ),
             ), // ... to here.
           );
@@ -234,7 +190,8 @@ class StartPageState extends State<StartPage> {
       savedCollections = persistence.loadedCollections;
     });
     if (savedCollections.length != 0 && savedCollections != null) {
-      logger.log("_buildCollectionListView Method with "+savedCollections.toString());
+      logger.log("_buildCollectionListView Method with " +
+          savedCollections.toString());
       return ListView.builder(
         padding: const EdgeInsets.all(16.0),
         itemBuilder: (context, i) {
@@ -277,7 +234,7 @@ class StartPageState extends State<StartPage> {
   final newCollectionDescController = TextEditingController();
 
   ///Methods for displaying the Making of a new Collection
-  void _newCollection() {
+  void newCollection() {
     Navigator.of(context).push(
       new MaterialPageRoute<void>(
         builder: (BuildContext context) {
@@ -287,11 +244,13 @@ class StartPageState extends State<StartPage> {
               title: Text('create a new collection'),
             ),
             body: new ListView(children: [
-              creationUI.spaceDivider(),
-              creationUI.nameWidget("Collection name", newCollectionNameController),
-              creationUI.spaceDivider(),
-              creationUI.descriptionWidget("Collection description", newCollectionDescController),
-              creationUI.spaceDivider(),
+              createStuffUI.spaceDivider(),
+              createStuffUI.nameWidget(
+                  "Collection name", newCollectionNameController),
+              createStuffUI.spaceDivider(),
+              createStuffUI.descriptionWidget(
+                  "Collection description", newCollectionDescController),
+              createStuffUI.spaceDivider(),
               Container(
                 padding: EdgeInsets.only(
                   left: 30.0,
@@ -307,10 +266,7 @@ class StartPageState extends State<StartPage> {
               child: new FloatingActionButton(
                 onPressed: addCollection,
                 tooltip: 'New Item',
-                child: new Icon(
-                  Icons.check,
-                  color: Colors.black,
-                ),
+                child: new Icon(Icons.check, color: Colors.black),
               ),
             ),
           ); // ... to here.
@@ -380,9 +336,13 @@ class StartPageState extends State<StartPage> {
 
   void addCollection() {
     String currency;
-    switch(_radioValue){
-      case 0: currency = "USD"; break;
-      case 1: currency = "EUR"; break;
+    switch (_radioValue) {
+      case 0:
+        currency = "USD";
+        break;
+      case 1:
+        currency = "EUR";
+        break;
     }
     Collection collection = new Collection(newCollectionNameController.text,
         newCollectionDescController.text, new List<CollectionItem>(), currency);
@@ -400,12 +360,17 @@ class StartPageState extends State<StartPage> {
   final newItemPhotoCntrl = TextEditingController();
 
   ///Methods for displaying the Making of a new Item
-  void _newItem() {
-    Widget itemNameWidget = creationUI.nameWidget("Item name", newItemNameCntrl);
-    Widget itemDescriptionWidget = creationUI.descriptionWidget("Item description", newItemDescCntrl);
-    Widget itemValueWidget = creationUI.valueWidget("Item value", "", newItemValueCntrl);
-    Widget itemCountWidget = creationUI.countWidget("Item count", "", newItemCountCntrl);
-    Widget itemFotoWidget = creationUI.photoWidget(null);
+  void newItem() {
+    logger.logM("newItem", null, null);
+    Widget itemNameWidget =
+        createStuffUI.nameWidget("Item name", newItemNameCntrl);
+    Widget itemDescriptionWidget =
+        createStuffUI.descriptionWidget("Item description", newItemDescCntrl);
+    Widget itemValueWidget =
+        createStuffUI.valueWidget("Item value", "", newItemValueCntrl);
+    Widget itemCountWidget =
+        createStuffUI.countWidget("Item count", "1", newItemCountCntrl);
+    Widget itemFotoWidget = createStuffUI.photoWidget(null);
 
     Navigator.of(context).push(
       new MaterialPageRoute<void>(
@@ -416,15 +381,15 @@ class StartPageState extends State<StartPage> {
                 title: Text('New Item'),
               ),
               body: new ListView(children: [
-                creationUI.spaceDivider(),
+                createStuffUI.spaceDivider(),
                 itemNameWidget,
-                creationUI.spaceDivider(),
+                createStuffUI.spaceDivider(),
                 itemDescriptionWidget,
-                creationUI.spaceDivider(),
+                createStuffUI.spaceDivider(),
                 itemValueWidget,
-                creationUI.spaceDivider(),
+                createStuffUI.spaceDivider(),
                 itemCountWidget,
-                creationUI.spaceDivider(),
+                createStuffUI.spaceDivider(),
 //                itemFotoWidget,
               ]),
               floatingActionButton: Theme(
@@ -432,10 +397,10 @@ class StartPageState extends State<StartPage> {
                 child: new FloatingActionButton(
                   onPressed: addItem,
                   tooltip: 'New Item',
-                  child: new Icon(Icons.check,
-                      color: Colors.black),
+                  child: new Icon(Icons.check, color: Colors.black),
                 ),
-              ));
+              ),
+          );
         },
       ),
     );
@@ -464,16 +429,24 @@ class StartPageState extends State<StartPage> {
 
   ///Methods for Item Details screen
   void _openItem(CollectionItem item) {
-
     Navigator.of(context)
-        .push(new MaterialPageRoute<void>(builder: (BuildContext context) {
-      return new Scaffold(
-        // Add 6 lines from here...
-        appBar: new AppBar(
-          title: Text(item.name),
-        ),
-        body: creationUI.spaceDivider(),
-      );
+        .push(MaterialPageRoute<void>(builder: (BuildContext context) {
+      return Scaffold(
+          // Add 6 lines from here...
+          appBar: AppBar(
+            title: Text(item.name),
+          ),
+          body: ListView(
+            children: <Widget>[
+              detailUI.headerItem(item.name, item.description),
+              createStuffUI.spaceDivider(),
+              detailUI.itemValueField(
+                  item.value, currentlyOpenCollection.currencyIcon),
+              createStuffUI.spaceDivider(),
+              detailUI.itemCountField(item.count),
+              createStuffUI.spaceDivider()
+            ],
+          ));
     }));
   }
 }
