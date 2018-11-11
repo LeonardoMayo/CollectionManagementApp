@@ -9,7 +9,8 @@ class Persistence {
   Logger logger;
 
   ///Class fields
-  StartPageState homePage;
+  HomePageState homePage;
+  StartupState startupPage;
   String appPath;
   String filePath;
   File managementFile;
@@ -17,8 +18,8 @@ class Persistence {
   List<Collection> loadedCollections;
   bool isLoaded;
 
-  Persistence(StartPageState startPage) {
-    homePage = startPage;
+  Persistence(StartupState startPage) {
+    startupPage = startPage;
 
     logger = new Logger("Persistence");
 
@@ -87,18 +88,19 @@ class Persistence {
     for (int i = 0; i < data.length; i++) {
       _loadCollectionFromFile(data[i]);
     }
+    //TODO here is something
     isLoaded = true;
     logger.log(loadedCollections.toString());
   }
 
   void _loadCollectionFromFile(String fileName) {
-
     logger.logM("_loadCollectionFromFile", String, fileName);
-    String currentPath = filePath + fileName+".txt";
+    String currentPath = filePath + fileName + ".txt";
 
     File file = File(currentPath);
     file.readAsLines().then((List<String> lines) {
       String name, description, currency;
+      logger.log(lines.toString());
       List<CollectionItem> savedItems = new List<CollectionItem>();
 
       name = lines[0];
@@ -115,12 +117,13 @@ class Persistence {
         itemDesc = contents[1];
         itemValue = int.parse(contents[2]);
         itemCount = int.parse(contents[3]);
-        itemPicPath = contents[4];
+//        itemPicPath = contents[4];
 
         savedItems.add(CollectionItem(
-            itemName, itemDesc, itemValue, itemCount, itemPicPath));
+            itemName, itemDesc, itemValue, itemCount, null));
       }
-      Collection collection = Collection(name, description, savedItems, currency);
+      Collection collection =
+          Collection(name, description, savedItems, currency);
       logger.log(collection.toString());
 //      return collection;
       loadedCollections.add(collection);
@@ -165,31 +168,53 @@ class Persistence {
 
   void writeItemIntoCollectionFile(
       Collection collection, CollectionItem item) async {
-    logger.log("writeItemIntoCollectionFile Method with Collection "+collection.toString()+"and Item "+item.toString());
+    logger.log("writeItemIntoCollectionFile Method with Collection " +
+        collection.toString() +
+        "and Item " +
+        item.toString());
     final file = _getCorrectFile(collection.name);
 
-    String result = item.name +
-        ";" +
-        item.description +
-        ";" +
-        item.value.toString() +
-        ";" +
-        item.count.toString();
-    var sink = file.openWrite();
+    file.readAsLines().then((List<String> lines){
+      String result = item.name +
+          ";" +
+          item.description +
+          ";" +
+          item.value.toString() +
+          ";" +
+          item.count.toString();
+      lines.add(result);
 
-    sink.writeln(result);
+      var sink = file.openWrite();
 
-    sink.close();
+      for(int i = 0; i < lines.length; i++){
+        sink.writeln(lines[i]);
+      }
+
+      sink.close();
+
+    });
   }
 
   void writeCollectionNameIntoManagementFile(String name) {
-    logger.log("writeCollectionNameIntoManagementFile Method with String "+name);
+    logger.log(
+        "writeCollectionNameIntoManagementFile Method with String " + name);
     if (name != null && name != "") {
-      var sink = managementFile.openWrite();
-      sink.writeln(name);
-      sink.close();
+//      List<String> lines = List<String>();
 
-      logger.log(managementFile.readAsStringSync());
+      var sinkRead = managementFile.openRead();
+      logger.log(sinkRead.toString());
+
+      managementFile.readAsLines().then((List<String> lines) {
+        lines.add(name);
+        var sink = managementFile.openWrite();
+
+        for(int i = 0; i < lines.length; i++){
+          sink.writeln(lines[i]);
+        }
+
+        sink.close();
+        logger.log(managementFile.readAsStringSync());
+      });
     }
   }
 

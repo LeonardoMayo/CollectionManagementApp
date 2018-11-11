@@ -5,12 +5,12 @@ import 'logger.dart';
 import 'package:flutter/material.dart';
 
 class DetailUI {
-  StartPageState homePage;
+  HomePageState homePage;
   CreateStuffUI createStuffUI;
   Constants constants;
   Logger logger;
 
-  DetailUI(StartPageState homePage) {
+  DetailUI(HomePageState homePage) {
     this.homePage = homePage;
     createStuffUI = homePage.createStuffUI;
 

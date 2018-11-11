@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:path_provider/path_provider.dart';
+import 'package:splashscreen/splashscreen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'collection.dart';
@@ -24,21 +25,61 @@ class MyApp extends StatelessWidget {
         primaryColor: Colors.black,
         accentColor: Colors.grey[600],
       ),
-      home: new StartPage(title: 'Collection Manager Startpage'),
+      home: Startup(),
+//      home: new HomePage(title: 'Collection Manager Startpage'),
     );
   }
 }
 
-class StartPage extends StatefulWidget {
-  StartPage({Key key, this.title}) : super(key: key);
-
-  final String title;
+class Startup extends StatefulWidget{
 
   @override
-  StartPageState createState() => new StartPageState();
+  StartupState createState() => new StartupState();
+
 }
 
-class StartPageState extends State<StartPage> {
+class StartupState extends State<Startup>{
+
+  Logger logger;
+  Persistence persistence;
+
+  @override
+  void initState() {
+
+    logger = Logger("StartupState");
+    persistence = Persistence(this);
+
+    super.initState();
+    logger.logM("initState", null, null);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    logger.logM("build", BuildContext, context);
+    return SplashScreen(
+      seconds: 5,
+      navigateAfterSeconds: HomePage(startupState: this,),
+      backgroundColor: Colors.black12,
+      styleTextUnderTheLoader: new TextStyle(),
+      photoSize: 100.0,
+      onClick: ()=>print("Flutter Egypt"),
+      loaderColor: Colors.red,
+    );
+  }
+
+}
+
+class HomePage extends StatefulWidget {
+  HomePage({Key key, this.title, this.startupState}) : super(key: key);
+
+  final String title;
+  final StartupState startupState;
+
+  @override
+  HomePageState createState() => new HomePageState(startupState);
+}
+
+class HomePageState extends State<HomePage> {
   List<Collection> savedCollections = new List<Collection>();
 
   CollectionUI collectionUI;
@@ -54,18 +95,19 @@ class StartPageState extends State<StartPage> {
   //Runtime Vars
   Collection currentlyOpenCollection;
 
+  HomePageState(StartupState startupState){
+    print("HomePageState Konstruktor");
+    persistence = startupState.persistence;
+  }
+
   @override
   initState() {
-    persistence = Persistence(this);
+//    persistence = Persistence(StartupState());
     logger = Logger("StartPageState");
     createStuffUI = CreateStuffUI(this);
     collectionUI = CollectionUI();
     itemUI = ItemUI();
     detailUI = DetailUI(this);
-
-    setState(() {
-      savedCollections = persistence.loadedCollections;
-    });
 
     super.initState();
     logger.log("initState Method");
@@ -81,9 +123,13 @@ class StartPageState extends State<StartPage> {
   Widget build(BuildContext context) {
     logger.logM("build", BuildContext, context);
 
+    setState(() {
+      savedCollections = persistence.loadedCollections;
+    });
+
     return new Scaffold(
         appBar: new AppBar(
-          title: new Text(widget.title),
+          title: new Text("CollectionStack"),
         ),
         body: _buildCollectionListView(),
         drawer: detailUI.appDrawer(context),

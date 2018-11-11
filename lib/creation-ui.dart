@@ -4,9 +4,9 @@ import 'main.dart';
 
 class CreateStuffUI{
 
-  StartPageState homePage;
+  HomePageState homePage;
 
-  CreateStuffUI(StartPageState startPage){
+  CreateStuffUI(HomePageState startPage){
     homePage = startPage;
   }
 
