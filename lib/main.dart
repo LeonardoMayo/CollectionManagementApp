@@ -155,6 +155,17 @@ class HomePageState extends State<HomePage> {
             // Add 6 lines from here...
             appBar: new AppBar(
               title: Text(collection.name),
+              actions: <Widget>[
+                IconButton(icon: Icon(
+                  Icons.delete,
+                  color: Colors.red,
+                ),
+                    onPressed: confirmToDeleteCollection),
+                IconButton(icon: Icon(
+                  Icons.settings,
+                  color: Colors.red,
+                ), onPressed: editCollection)
+              ],
             ),
             body: new ListView.builder(
                 padding: const EdgeInsets.all(18.0),
@@ -169,7 +180,7 @@ class HomePageState extends State<HomePage> {
                           _openItem(collection.savedItems[i - 1]);
                         },
                         onLongPress: () {
-                          confirmToDeleteItem(collection.savedItems[i - 1]);
+//                          confirmToDeleteItem(collection.savedItems[i - 1]);
                         },
                         child: new Container(
                           padding: const EdgeInsets.all(32.0),
@@ -259,21 +270,6 @@ class HomePageState extends State<HomePage> {
           child: Text(
               "You don't have any collections yet! \nTap the '+' below to create one!"));
     }
-  }
-
-  void confirmToDeleteItem(CollectionItem item) {
-    new AlertDialog(
-      title: new Text("Are you sure?"),
-      content: new Center(
-          child:
-              new Text("Are you sure you want to delete " + item.name + "?")),
-      actions: <Widget>[
-        new RaisedButton(
-          child: new Text("Yes"),
-          onPressed: () {},
-        )
-      ],
-    );
   }
 
   final newCollectionNameController = TextEditingController();
@@ -473,14 +469,29 @@ class HomePageState extends State<HomePage> {
     newItemValueCntrl.text = "";
   }
 
+  CollectionItem currentlyOpenItem;
+
   ///Methods for Item Details screen
   void _openItem(CollectionItem item) {
+    currentlyOpenItem = item;
+
     Navigator.of(context)
         .push(MaterialPageRoute<void>(builder: (BuildContext context) {
       return Scaffold(
           // Add 6 lines from here...
           appBar: AppBar(
             title: Text(item.name),
+            actions: <Widget>[
+              IconButton(icon: Icon(
+                Icons.delete,
+                color: Colors.red,
+              ),
+                  onPressed: confirmToDeleteItem),
+              IconButton(icon: Icon(
+                Icons.settings,
+                color: Colors.red,
+              ), onPressed: editItem)
+            ],
           ),
           body: ListView(
             children: <Widget>[
@@ -494,5 +505,34 @@ class HomePageState extends State<HomePage> {
             ],
           ));
     }));
+  }
+
+  void confirmToDeleteCollection() {
+    logger.logM("confirmToDeleteCollection", null, null);
+
+  }
+
+  void editCollection() {
+    logger.logM("editCollection", null, null);
+  }
+
+  void editItem() {
+    logger.logM("editItem", null, null);
+  }
+
+  void confirmToDeleteItem() {
+    logger.logM("confirmToDeleteItem", null, null);
+    new AlertDialog(
+      title: new Text("Are you sure?"),
+      content: new Center(
+          child:
+          new Text("Are you sure you want to delete " + currentlyOpenItem.name + "?")),
+      actions: <Widget>[
+        new RaisedButton(
+          child: new Text("Yes"),
+          onPressed: () {},
+        )
+      ],
+    );
   }
 }
