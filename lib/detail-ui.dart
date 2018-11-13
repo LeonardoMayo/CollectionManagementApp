@@ -119,11 +119,24 @@ class DetailUI {
 
     return Container(
       padding: const EdgeInsets.all(32.0),
+      decoration: new BoxDecoration(
+          borderRadius: BorderRadius.all(new Radius.circular(18.0)),
+          border: Border.all(
+            color: Colors.grey,
+            width: 2.0,
+            style: BorderStyle.solid,
+          )
+      ),
       child: Row(
         children: <Widget>[
+          Expanded(child: Text(
+            "Value:",
+            style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold),
+            textAlign: TextAlign.left,
+          ),),
           Expanded(child:
             Text(value.toString(),
-              style: TextStyle(fontSize: 20.0,),
+              style: TextStyle(fontSize: 20.0,fontWeight: FontWeight.bold),
               textAlign: TextAlign.center,
             ),
           ),
@@ -136,11 +149,24 @@ class DetailUI {
   Widget itemCountField(int value) {
     return Container(
       padding: const EdgeInsets.all(32.0),
+      decoration: new BoxDecoration(
+          borderRadius: BorderRadius.all(new Radius.circular(18.0)),
+          border: Border.all(
+            color: Colors.grey,
+            width: 2.0,
+            style: BorderStyle.solid,
+          )
+      ),
       child: Row(
         children: <Widget>[
+          Expanded(child: Text(
+            "Count:",
+            style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold),
+            textAlign: TextAlign.left,
+          ),),
           Expanded(child:
           Text(value.toString(),
-            style: TextStyle(fontSize: 20.0),
+            style: TextStyle(fontSize: 20.0,fontWeight: FontWeight.bold),
             textAlign: TextAlign.center,
           ),
           ),

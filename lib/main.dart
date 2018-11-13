@@ -287,11 +287,9 @@ class HomePageState extends State<HomePage> {
             ),
             body: new ListView(children: [
               createStuffUI.spaceDivider(),
-              createStuffUI.nameWidget(
-                  "Collection name", newCollectionNameController),
+              createStuffUI.nameWidget("Collection name","", newCollectionNameController),
               createStuffUI.spaceDivider(),
-              createStuffUI.descriptionWidget(
-                  "Collection description", newCollectionDescController),
+              createStuffUI.descriptionWidget("Collection description","", newCollectionDescController),
               createStuffUI.spaceDivider(),
               Container(
                 padding: EdgeInsets.only(
@@ -405,9 +403,9 @@ class HomePageState extends State<HomePage> {
   void newItem() {
     logger.logM("newItem", null, null);
     Widget itemNameWidget =
-        createStuffUI.nameWidget("Item name", newItemNameCntrl);
+        createStuffUI.nameWidget("Item name", "", newItemNameCntrl);
     Widget itemDescriptionWidget =
-        createStuffUI.descriptionWidget("Item description", newItemDescCntrl);
+        createStuffUI.descriptionWidget("Item description", "", newItemDescCntrl);
     Widget itemValueWidget =
         createStuffUI.valueWidget("Item value", "", newItemValueCntrl);
     Widget itemCountWidget =
@@ -507,17 +505,69 @@ class HomePageState extends State<HomePage> {
     }));
   }
 
+  final editCollectionName = TextEditingController();
+  final editCollectionDesc = TextEditingController();
+
+  void editCollection() {
+    logger.logM("editCollection", null, null);
+    Navigator.of(context).push(MaterialPageRoute<void>(builder: (BuildContext context){
+      return Scaffold(
+        appBar: AppBar(
+          title: Text("editing " + currentlyOpenCollection.name),
+        ),
+        body: ListView(children: <Widget>[
+          createStuffUI.nameWidget("", currentlyOpenCollection.name, editCollectionName),
+          createStuffUI.spaceDivider(),
+          createStuffUI.descriptionWidget("", currentlyOpenCollection.description, editCollectionDesc),
+          createStuffUI.spaceDivider(),
+        ],),
+        floatingActionButton: Theme(
+          data: Theme.of(context).copyWith(accentColor: Colors.yellow),
+          child: new FloatingActionButton(
+            onPressed: updateCollection,
+            child: new Icon(Icons.check, color: Colors.black),
+          ),
+        ),
+      );
+    }));
+  }
+
   void confirmToDeleteCollection() {
     logger.logM("confirmToDeleteCollection", null, null);
 
   }
 
-  void editCollection() {
-    logger.logM("editCollection", null, null);
-  }
+  final editItemName = TextEditingController();
+  final editItemDesc = TextEditingController();
+  final editItemCount = TextEditingController();
+  final editItemValue = TextEditingController();
 
   void editItem() {
     logger.logM("editItem", null, null);
+    Navigator.of(context).push(MaterialPageRoute<void>(builder: (BuildContext context){
+      return Scaffold(
+        appBar: AppBar(
+          title: Text("editing " + currentlyOpenItem.name),
+        ),
+        body: ListView(children: <Widget>[
+          createStuffUI.nameWidget("", currentlyOpenItem.name, editItemName),
+          createStuffUI.spaceDivider(),
+          createStuffUI.descriptionWidget("", currentlyOpenItem.description, editItemDesc),
+          createStuffUI.spaceDivider(),
+          createStuffUI.valueWidget("", currentlyOpenItem.value.toString(), editItemValue),
+          createStuffUI.spaceDivider(),
+          createStuffUI.countWidget("", currentlyOpenItem.count.toString(), editItemCount),
+          createStuffUI.spaceDivider(),
+        ],),
+        floatingActionButton: Theme(
+          data: Theme.of(context).copyWith(accentColor: Colors.yellow),
+          child: new FloatingActionButton(
+            onPressed: updateItem,
+            child: new Icon(Icons.check, color: Colors.black),
+          ),
+        ),
+      );
+    }));
   }
 
   void confirmToDeleteItem() {
@@ -534,5 +584,44 @@ class HomePageState extends State<HomePage> {
         )
       ],
     );
+  }
+
+  void updateCollection() {
+
+    String name, description;
+
+    name = editCollectionName.text;
+    description = editCollectionDesc.text;
+
+    Collection oldCollection = currentlyOpenCollection;
+
+    currentlyOpenCollection.name = name;
+    currentlyOpenCollection.description = description;
+
+    persistence.updateCollection(oldCollection, currentlyOpenCollection);
+
+    leaveScreen();
+  }
+
+  void updateItem() {
+
+    String name, description;
+    int count, value;
+
+    name = editItemName.text;
+    description = editItemDesc.text;
+    count = int.parse(editItemCount.text);
+    value = int.parse(editItemValue.text);
+
+    CollectionItem oldItem = currentlyOpenItem;
+
+    currentlyOpenItem.name = name;
+    currentlyOpenItem.description = description;
+    currentlyOpenItem.count = count;
+    currentlyOpenItem.value = value;
+
+    persistence.updateItem(oldItem, currentlyOpenItem);
+
+    leaveScreen();
   }
 }

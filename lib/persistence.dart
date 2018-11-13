@@ -251,4 +251,75 @@ class Persistence {
 
     sink.close();
   }
+
+  void updateCollection(Collection oldCollection, Collection collection) {
+    logger.logM("updateCollection", Collection, collection.toString());
+
+    //changing entry in management file
+    List<String> managementFileLines = managementFile.readAsLinesSync();
+
+    var sinkManagement = managementFile.openWrite();
+    for(int i = 0; i < managementFileLines.length; i++){
+      if (managementFileLines[i] == oldCollection.name){
+        managementFileLines[i] = collection.name;
+      }
+      if (managementFileLines[i] == oldCollection.description){
+        managementFileLines[i] = collection.description;
+      }
+      if (managementFileLines[i] == oldCollection.currency){
+        managementFileLines[i] = collection.currency;
+      }
+
+      sinkManagement.writeln(managementFileLines[i]);
+    }
+    sinkManagement.close();
+
+  //  creating file for the new collection
+    writeCollection(collection);
+
+    for(int i = 0; i < collection.savedItems.length; i++){
+      writeItemIntoCollectionFile(collection, collection.savedItems[i]);
+    }
+
+  //removing old collection
+    File oldCollectionFile = _getCorrectFile(oldCollection.name);
+    oldCollectionFile.deleteSync();
+
+  }
+
+  void updateItem(CollectionItem oldItem, CollectionItem item) {
+    logger.logM("updateItem", null, null);
+
+    //changing entry in collection file
+    File collectionFile = _getCorrectFile(homePage.currentlyOpenCollection.name);
+    List<String> collectionFileLines = collectionFile.readAsLinesSync();
+
+    String newItemString = item.name +
+        ";" +
+        item.description +
+        ";" +
+        item.value.toString() +
+        ";" +
+        item.count.toString();
+
+    String oldItemString = oldItem.name +
+        ";" +
+        item.description +
+        ";" +
+        item.value.toString() +
+        ";" +
+        item.count.toString();
+
+    var sinkCollection = collectionFile.openWrite();
+
+    for(int i = 0; i < collectionFileLines.length; i++){
+      if (collectionFileLines[i] == oldItemString){
+        collectionFileLines[i] = newItemString;
+      }
+      sinkCollection.writeln(collectionFileLines[i]);
+
+    }
+
+    sinkCollection.close();
+  }
 }
