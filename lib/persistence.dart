@@ -287,12 +287,15 @@ class Persistence {
 
   }
 
-  void updateItem(CollectionItem oldItem, CollectionItem item) {
+  void updateItem(String collectionName, CollectionItem oldItem, CollectionItem item) {
     logger.logM("updateItem", null, null);
 
     //changing entry in collection file
-    File collectionFile = _getCorrectFile(homePage.currentlyOpenCollection.name);
+    File collectionFile = _getCorrectFile(collectionName);
     List<String> collectionFileLines = collectionFile.readAsLinesSync();
+
+    logger.log(oldItem.toString());
+    logger.log(item.toString());
 
     String newItemString = item.name +
         ";" +

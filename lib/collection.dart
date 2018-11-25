@@ -47,6 +47,8 @@ class Collection {
     return result;
   }
 
+
+
   String get name => _name;
 
   set name(String value) {
@@ -108,6 +110,15 @@ class CollectionItem {
     _value = value;
     _count = count;
     _picturePath = picturePath;
+  }
+
+  @override
+  String toString(){
+    String result;
+
+    result = "[" + _name +"; " +_description+"; " +_value.toString()+"; "+_count.toString()+"]";
+
+    return result;
   }
 
   int get value => _value;

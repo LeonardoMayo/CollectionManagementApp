@@ -667,22 +667,31 @@ class HomePageState extends State<HomePage> {
 
   void updateCollection() {
     String name, description;
-    Collection oldCollection = currentlyOpenCollection;
+    //TODO rewrite
+
+    Collection newCollection;
+    newCollection.currency = currentlyOpenCollection.currency;
+    newCollection.savedItems = currentlyOpenCollection.savedItems;
+
 
     if (editCollectionName.text != "") {
       name = editCollectionName.text;
-      currentlyOpenCollection.name = name;
+      newCollection.name = name;
+    } else {
+      newCollection.name = currentlyOpenCollection.name;
     }
 
     if (editCollectionDesc.text != "") {
       description = editCollectionDesc.text;
-      currentlyOpenCollection.description = description;
+      newCollection.description = description;
+    } else {
+      newCollection.description = currentlyOpenCollection.description;
     }
 
 //    logger.log(oldCollection.toString());
 //    logger.log(currentlyOpenCollection.toString());
 
-    persistence.updateCollection(oldCollection, currentlyOpenCollection);
+    persistence.updateCollection(currentlyOpenCollection, newCollection);
 
     leaveScreen();
   }
@@ -690,26 +699,39 @@ class HomePageState extends State<HomePage> {
   void updateItem() {
     String name, description;
     int count, value;
-    CollectionItem oldItem = currentlyOpenItem;
+    //TODO rewrite
 
-    if (editItemName.text != null) {
+    CollectionItem newItem;
+
+    if (editItemName.text != "") {
       name = editItemName.text;
-      currentlyOpenItem.name = name;
-    }
-    if (editItemDesc.text != null) {
-      description = editItemDesc.text;
-      currentlyOpenItem.description = description;
-    }
-    if (editItemCount.text != null) {
-      count = int.parse(editItemCount.text);
-      currentlyOpenItem.count = count;
-    }
-    if (editItemValue.text != null) {
-      value = int.parse(editItemValue.text);
-      currentlyOpenItem.value = value;
+      newItem.name = name;
+    } else {
+      newItem.name = currentlyOpenItem.name;
     }
 
-    persistence.updateItem(oldItem, currentlyOpenItem);
+    if (editItemDesc.text != "") {
+      description = editItemDesc.text;
+      newItem.description = description;
+    } else {
+      newItem.description = currentlyOpenItem.description;
+    }
+
+    if (editItemCount.text != "") {
+      count = int.parse(editItemCount.text);
+      newItem.count = count;
+    } else {
+      newItem.count = currentlyOpenItem.count;
+    }
+
+    if (editItemValue.text != "") {
+      value = int.parse(editItemValue.text);
+      newItem.value = value;
+    } else {
+      newItem.value = currentlyOpenItem.value;
+    }
+
+    persistence.updateItem(currentlyOpenCollection.name, currentlyOpenItem, newItem);
 
     leaveScreen();
   }
