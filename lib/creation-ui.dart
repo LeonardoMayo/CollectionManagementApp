@@ -12,7 +12,7 @@ class CreateStuffUI{
 
   ///Multiple usable Widgets
   Widget nameWidget(String hinttext, String text, TextEditingController controller) {
-    controller.text = text;
+//    controller.text = text;
 
     return Row(
       children: <Widget>[
@@ -47,7 +47,7 @@ class CreateStuffUI{
   }
 
   Widget descriptionWidget(String hinttext, String text, TextEditingController controller) {
-    controller.text = text;
+//    controller.text = text;
 
     return Row(
       children: <Widget>[
@@ -85,7 +85,7 @@ class CreateStuffUI{
   }
 
   Widget valueWidget(String hinttext, String text, TextEditingController controller) {
-    controller.text = text;
+//    controller.text = text;
 
     return Row(
       children: <Widget>[
@@ -147,7 +147,7 @@ class CreateStuffUI{
   }
 
   Widget countWidget(String hinttext, String text, TextEditingController controller) {
-    controller.text = text;
+//    controller.text = text;
 
     return Row(
       children: <Widget>[

@@ -322,4 +322,40 @@ class Persistence {
 
     sinkCollection.close();
   }
+
+  void deleteCollection(Collection collection) {
+    logger.logM("deleteCollection", Collection, collection);
+    //Removing Entry from Appmanager File
+    List<String> managementFileLines = managementFile.readAsLinesSync();
+    var managementSink = managementFile.openWrite();
+    for(int i = 0; i < managementFileLines.length; i++){
+      if (managementFileLines[i] != collection.name){
+        managementSink.writeln(managementFileLines[i]);
+      }
+    }
+    managementSink.close();
+
+    //Removing Collection file
+    File collectionFile = _getCorrectFile(collection.name);
+    collectionFile.deleteSync();
+  }
+
+  void deleteItem(String collectionName, CollectionItem item) {
+    logger.logM("deleteItem", CollectionItem, item);
+    //Removing Item from Collection File
+    File collectionFile = _getCorrectFile(collectionName);
+
+    String itemString = item.name + ";" + item.description + ";" + item.value.toString() + ";" + item.count.toString();
+
+    List<String> collectionFileLines = collectionFile.readAsLinesSync();
+    var sink = collectionFile.openWrite();
+
+    for(int i = 0; i < collectionFileLines.length; i++){
+      if (collectionFileLines[i] != itemString){
+        sink.writeln(collectionFileLines[i]);
+      }
+    }
+
+    sink.close();
+  }
 }

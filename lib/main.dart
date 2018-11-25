@@ -31,21 +31,17 @@ class MyApp extends StatelessWidget {
   }
 }
 
-class Startup extends StatefulWidget{
-
+class Startup extends StatefulWidget {
   @override
   StartupState createState() => new StartupState();
-
 }
 
-class StartupState extends State<Startup>{
-
+class StartupState extends State<Startup> {
   Logger logger;
   Persistence persistence;
 
   @override
   void initState() {
-
     logger = Logger("StartupState");
     persistence = Persistence(this);
 
@@ -58,15 +54,16 @@ class StartupState extends State<Startup>{
     logger.logM("build", BuildContext, context);
     return SplashScreen(
       seconds: 5,
-      navigateAfterSeconds: HomePage(startupState: this,),
+      navigateAfterSeconds: HomePage(
+        startupState: this,
+      ),
       backgroundColor: Colors.black12,
       styleTextUnderTheLoader: new TextStyle(),
       photoSize: 100.0,
-      onClick: ()=>print("Flutter Egypt"),
+      onClick: () => print("Flutter Egypt"),
       loaderColor: Colors.red,
     );
   }
-
 }
 
 class HomePage extends StatefulWidget {
@@ -95,7 +92,7 @@ class HomePageState extends State<HomePage> {
   //Runtime Vars
   Collection currentlyOpenCollection;
 
-  HomePageState(StartupState startupState){
+  HomePageState(StartupState startupState) {
     print("HomePageState Konstruktor");
     persistence = startupState.persistence;
   }
@@ -128,25 +125,27 @@ class HomePageState extends State<HomePage> {
     });
 
     return new Scaffold(
-        appBar: new AppBar(
-          title: new Text("CollectionStack"),
+      appBar: new AppBar(
+        title: new Text("CollectionStack"),
+      ),
+      body: _buildCollectionListView(),
+      drawer: detailUI.appDrawer(context),
+      floatingActionButton: Theme(
+        data: Theme.of(context).copyWith(accentColor: Colors.yellow),
+        child: new FloatingActionButton(
+          onPressed: newCollection,
+          child: new Icon(Icons.add, color: Colors.black),
         ),
-        body: _buildCollectionListView(),
-        drawer: detailUI.appDrawer(context),
-        floatingActionButton:
-    Theme(
-    data: Theme.of(context).copyWith(accentColor: Colors.yellow),
-    child: new FloatingActionButton(
-    onPressed: newCollection,
-    child: new Icon(Icons.add, color: Colors.black),
-    ),
-    ), );
+      ),
+    );
   }
 
   ///full with Test Collections atm, will load safed collections from files
   ///Collection Methods
 
   void _openCollection(Collection collection) {
+    logger.logM("_openCollection", Collection, collection);
+
     currentlyOpenCollection = collection;
     Navigator.of(context).push(
       new MaterialPageRoute<void>(
@@ -156,15 +155,18 @@ class HomePageState extends State<HomePage> {
             appBar: new AppBar(
               title: Text(collection.name),
               actions: <Widget>[
-                IconButton(icon: Icon(
-                  Icons.delete,
-                  color: Colors.red,
-                ),
+                IconButton(
+                    icon: Icon(
+                      Icons.delete,
+                      color: Colors.red,
+                    ),
                     onPressed: confirmToDeleteCollection),
-                IconButton(icon: Icon(
-                  Icons.settings,
-                  color: Colors.red,
-                ), onPressed: editCollection)
+                IconButton(
+                    icon: Icon(
+                      Icons.settings,
+                      color: Colors.red,
+                    ),
+                    onPressed: editCollection)
               ],
             ),
             body: new ListView.builder(
@@ -212,8 +214,12 @@ class HomePageState extends State<HomePage> {
                                 ),
                               ),
                               createStuffUI.countWidgetIcon(20.0),
-                              Container(padding: const EdgeInsets.all(1.0),child:
-                              Text(collection.savedItems[i - 1].count.toString(), style: TextStyle(fontSize: 18.0)),
+                              Container(
+                                padding: const EdgeInsets.all(1.0),
+                                child: Text(
+                                    collection.savedItems[i - 1].count
+                                        .toString(),
+                                    style: TextStyle(fontSize: 18.0)),
                               ),
                               createStuffUI.spaceDivider(),
                               Text(
@@ -287,9 +293,11 @@ class HomePageState extends State<HomePage> {
             ),
             body: new ListView(children: [
               createStuffUI.spaceDivider(),
-              createStuffUI.nameWidget("Collection name","", newCollectionNameController),
+              createStuffUI.nameWidget(
+                  "Collection name", "", newCollectionNameController),
               createStuffUI.spaceDivider(),
-              createStuffUI.descriptionWidget("Collection description","", newCollectionDescController),
+              createStuffUI.descriptionWidget(
+                  "Collection description", "", newCollectionDescController),
               createStuffUI.spaceDivider(),
               Container(
                 padding: EdgeInsets.only(
@@ -404,8 +412,8 @@ class HomePageState extends State<HomePage> {
     logger.logM("newItem", null, null);
     Widget itemNameWidget =
         createStuffUI.nameWidget("Item name", "", newItemNameCntrl);
-    Widget itemDescriptionWidget =
-        createStuffUI.descriptionWidget("Item description", "", newItemDescCntrl);
+    Widget itemDescriptionWidget = createStuffUI.descriptionWidget(
+        "Item description", "", newItemDescCntrl);
     Widget itemValueWidget =
         createStuffUI.valueWidget("Item value", "", newItemValueCntrl);
     Widget itemCountWidget =
@@ -416,30 +424,30 @@ class HomePageState extends State<HomePage> {
       new MaterialPageRoute<void>(
         builder: (BuildContext context) {
           return new Scaffold(
-              // Add 6 lines from here...
-              appBar: new AppBar(
-                title: Text('New Item'),
-              ),
-              body: new ListView(children: [
-                createStuffUI.spaceDivider(),
-                itemNameWidget,
-                createStuffUI.spaceDivider(),
-                itemDescriptionWidget,
-                createStuffUI.spaceDivider(),
-                itemValueWidget,
-                createStuffUI.spaceDivider(),
-                itemCountWidget,
-                createStuffUI.spaceDivider(),
+            // Add 6 lines from here...
+            appBar: new AppBar(
+              title: Text('New Item'),
+            ),
+            body: new ListView(children: [
+              createStuffUI.spaceDivider(),
+              itemNameWidget,
+              createStuffUI.spaceDivider(),
+              itemDescriptionWidget,
+              createStuffUI.spaceDivider(),
+              itemValueWidget,
+              createStuffUI.spaceDivider(),
+              itemCountWidget,
+              createStuffUI.spaceDivider(),
 //                itemFotoWidget,
-              ]),
-              floatingActionButton: Theme(
-                data: Theme.of(context).copyWith(accentColor: Colors.yellow),
-                child: new FloatingActionButton(
-                  onPressed: addItem,
-                  tooltip: 'New Item',
-                  child: new Icon(Icons.check, color: Colors.black),
-                ),
+            ]),
+            floatingActionButton: Theme(
+              data: Theme.of(context).copyWith(accentColor: Colors.yellow),
+              child: new FloatingActionButton(
+                onPressed: addItem,
+                tooltip: 'New Item',
+                child: new Icon(Icons.check, color: Colors.black),
               ),
+            ),
           );
         },
       ),
@@ -480,15 +488,18 @@ class HomePageState extends State<HomePage> {
           appBar: AppBar(
             title: Text(item.name),
             actions: <Widget>[
-              IconButton(icon: Icon(
-                Icons.delete,
-                color: Colors.red,
-              ),
+              IconButton(
+                  icon: Icon(
+                    Icons.delete,
+                    color: Colors.red,
+                  ),
                   onPressed: confirmToDeleteItem),
-              IconButton(icon: Icon(
-                Icons.settings,
-                color: Colors.red,
-              ), onPressed: editItem)
+              IconButton(
+                  icon: Icon(
+                    Icons.settings,
+                    color: Colors.red,
+                  ),
+                  onPressed: editItem)
             ],
           ),
           body: ListView(
@@ -510,17 +521,22 @@ class HomePageState extends State<HomePage> {
 
   void editCollection() {
     logger.logM("editCollection", null, null);
-    Navigator.of(context).push(MaterialPageRoute<void>(builder: (BuildContext context){
+    Navigator.of(context)
+        .push(MaterialPageRoute<void>(builder: (BuildContext context) {
       return Scaffold(
         appBar: AppBar(
           title: Text("editing " + currentlyOpenCollection.name),
         ),
-        body: ListView(children: <Widget>[
-          createStuffUI.nameWidget("", currentlyOpenCollection.name, editCollectionName),
-          createStuffUI.spaceDivider(),
-          createStuffUI.descriptionWidget("", currentlyOpenCollection.description, editCollectionDesc),
-          createStuffUI.spaceDivider(),
-        ],),
+        body: ListView(
+          children: <Widget>[
+            createStuffUI.nameWidget(
+                currentlyOpenCollection.name, "", editCollectionName),
+            createStuffUI.spaceDivider(),
+            createStuffUI.descriptionWidget(
+                currentlyOpenCollection.description, "", editCollectionDesc),
+            createStuffUI.spaceDivider(),
+          ],
+        ),
         floatingActionButton: Theme(
           data: Theme.of(context).copyWith(accentColor: Colors.yellow),
           child: new FloatingActionButton(
@@ -535,6 +551,37 @@ class HomePageState extends State<HomePage> {
   void confirmToDeleteCollection() {
     logger.logM("confirmToDeleteCollection", null, null);
 
+    showDialog<void>(
+      context: context,
+      barrierDismissible: false, // user must tap button!
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Are you sure?'),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: <Widget>[
+                Text('You are about to delete this collection.'),
+                Text('This Action can not be undone.'),
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            FlatButton(
+                child: Text('Cancel'),
+                onPressed: (){
+                  Navigator.of(context).pop();
+                }),
+            FlatButton(
+              child: Text('Delete', style: new TextStyle(color: Colors.red),),
+              onPressed: () {
+                Navigator.of(context).pop();
+                deleteCollection(currentlyOpenCollection);
+              },
+            ),
+          ],
+        );
+      },
+    );
   }
 
   final editItemName = TextEditingController();
@@ -544,21 +591,27 @@ class HomePageState extends State<HomePage> {
 
   void editItem() {
     logger.logM("editItem", null, null);
-    Navigator.of(context).push(MaterialPageRoute<void>(builder: (BuildContext context){
+    Navigator.of(context)
+        .push(MaterialPageRoute<void>(builder: (BuildContext context) {
       return Scaffold(
         appBar: AppBar(
           title: Text("editing " + currentlyOpenItem.name),
         ),
-        body: ListView(children: <Widget>[
-          createStuffUI.nameWidget("", currentlyOpenItem.name, editItemName),
-          createStuffUI.spaceDivider(),
-          createStuffUI.descriptionWidget("", currentlyOpenItem.description, editItemDesc),
-          createStuffUI.spaceDivider(),
-          createStuffUI.valueWidget("", currentlyOpenItem.value.toString(), editItemValue),
-          createStuffUI.spaceDivider(),
-          createStuffUI.countWidget("", currentlyOpenItem.count.toString(), editItemCount),
-          createStuffUI.spaceDivider(),
-        ],),
+        body: ListView(
+          children: <Widget>[
+            createStuffUI.nameWidget(currentlyOpenItem.name, "", editItemName),
+            createStuffUI.spaceDivider(),
+            createStuffUI.descriptionWidget(
+                currentlyOpenItem.description, "", editItemDesc),
+            createStuffUI.spaceDivider(),
+            createStuffUI.valueWidget(
+                currentlyOpenItem.value.toString(), "", editItemValue),
+            createStuffUI.spaceDivider(),
+            createStuffUI.countWidget(
+                currentlyOpenItem.count.toString(), "", editItemCount),
+            createStuffUI.spaceDivider(),
+          ],
+        ),
         floatingActionButton: Theme(
           data: Theme.of(context).copyWith(accentColor: Colors.yellow),
           child: new FloatingActionButton(
@@ -572,31 +625,56 @@ class HomePageState extends State<HomePage> {
 
   void confirmToDeleteItem() {
     logger.logM("confirmToDeleteItem", null, null);
-    new AlertDialog(
-      title: new Text("Are you sure?"),
-      content: new Center(
-          child:
-          new Text("Are you sure you want to delete " + currentlyOpenItem.name + "?")),
-      actions: <Widget>[
-        new RaisedButton(
-          child: new Text("Yes"),
-          onPressed: () {},
-        )
-      ],
+
+    showDialog<void>(
+      context: context,
+      barrierDismissible: false, // user must tap button!
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Are you sure?'),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: <Widget>[
+                Text('You are about to delete this item.'),
+                Text('This Action can not be undone.'),
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            FlatButton(
+                child: Text('Cancel'),
+                onPressed: (){
+                  Navigator.of(context).pop();
+            }),
+            FlatButton(
+              child: Text('Delete', style: new TextStyle(color: Colors.red),),
+              onPressed: () {
+                Navigator.of(context).pop();
+                deleteItem(currentlyOpenItem);
+              },
+            ),
+          ],
+        );
+      },
     );
   }
 
   void updateCollection() {
-
     String name, description;
-
-    name = editCollectionName.text;
-    description = editCollectionDesc.text;
-
     Collection oldCollection = currentlyOpenCollection;
 
-    currentlyOpenCollection.name = name;
-    currentlyOpenCollection.description = description;
+    if (editCollectionName.text != "") {
+      name = editCollectionName.text;
+      currentlyOpenCollection.name = name;
+    }
+
+    if (editCollectionDesc.text != "") {
+      description = editCollectionDesc.text;
+      currentlyOpenCollection.description = description;
+    }
+
+//    logger.log(oldCollection.toString());
+//    logger.log(currentlyOpenCollection.toString());
 
     persistence.updateCollection(oldCollection, currentlyOpenCollection);
 
@@ -604,24 +682,46 @@ class HomePageState extends State<HomePage> {
   }
 
   void updateItem() {
-
     String name, description;
     int count, value;
-
-    name = editItemName.text;
-    description = editItemDesc.text;
-    count = int.parse(editItemCount.text);
-    value = int.parse(editItemValue.text);
-
     CollectionItem oldItem = currentlyOpenItem;
 
-    currentlyOpenItem.name = name;
-    currentlyOpenItem.description = description;
-    currentlyOpenItem.count = count;
-    currentlyOpenItem.value = value;
+    if (editItemName.text != null) {
+      name = editItemName.text;
+      currentlyOpenItem.name = name;
+    }
+    if (editItemDesc.text != null) {
+      description = editItemDesc.text;
+      currentlyOpenItem.description = description;
+    }
+    if (editItemCount.text != null) {
+      count = int.parse(editItemCount.text);
+      currentlyOpenItem.count = count;
+    }
+    if (editItemValue.text != null) {
+      value = int.parse(editItemValue.text);
+      currentlyOpenItem.value = value;
+    }
 
     persistence.updateItem(oldItem, currentlyOpenItem);
 
     leaveScreen();
+  }
+
+  void deleteItem(CollectionItem item) {
+    logger.logM("deleteItem", CollectionItem, item);
+
+    persistence.deleteItem(currentlyOpenCollection.name, item);
+    setState(() {
+      currentlyOpenItem = null;
+    });
+  }
+
+  void deleteCollection(Collection collection) {
+    logger.logM("deleteCollection", Collection, collection);
+    persistence.deleteCollection(collection);
+    setState(() {
+      currentlyOpenCollection = null;
+    });
   }
 }
