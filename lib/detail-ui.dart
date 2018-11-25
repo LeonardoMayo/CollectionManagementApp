@@ -48,22 +48,17 @@ class DetailUI {
         child: new ListView(
       children: <Widget>[
         new DrawerHeader(
-          child: new Text('Header'),
+          child: new Text('Collection Stack'),
           decoration: ShapeDecoration(
             shape: CircleBorder(),
             color: Colors.black,
           ),
         ),
         new ListTile(
-          title: new Text('First Menu Item'),
+          title: new Text('Settings'),
           onTap: () {
             Navigator.pop(context);
-          },
-        ),
-        new ListTile(
-          title: new Text('Second Menu Item'),
-          onTap: () {
-            Navigator.pop(context);
+            homePage.openSettingsMenu();
           },
         ),
         new Divider(),
@@ -71,6 +66,7 @@ class DetailUI {
           title: new Text('About'),
           onTap: () {
             Navigator.pop(context);
+            homePage.openAbout();
           },
         ),
       ],
@@ -173,5 +169,25 @@ class DetailUI {
           Expanded(child: createStuffUI.countWidgetIcon(40.0),),
         ],),
     );
+  }
+
+  Text createdBy() {
+    return Text('CollectionStack was created by jpl - software and photo, check them out at their website!');
+  }
+
+  Text contactInfo() {
+    return Text('More infos on our website jpl-sw-n-photo.com \n '
+        'Contact us if you nedd help with CollectionStack at \n'
+        'info@jpl-sw-n-photo.com \n'
+        'or write us on twitter @jplswnphoto. \n'
+        'We are always glad to help!');
+  }
+
+  Text declarationOfSomething() {
+    return Text('Hereby we declare blabla nich verantwortlich blabla');
+  }
+
+  Text versionInfo() {
+    return Text('version number 0.91b');
   }
 }

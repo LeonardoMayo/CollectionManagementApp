@@ -568,11 +568,14 @@ class HomePageState extends State<HomePage> {
           actions: <Widget>[
             FlatButton(
                 child: Text('Cancel'),
-                onPressed: (){
+                onPressed: () {
                   Navigator.of(context).pop();
                 }),
             FlatButton(
-              child: Text('Delete', style: new TextStyle(color: Colors.red),),
+              child: Text(
+                'Delete',
+                style: new TextStyle(color: Colors.red),
+              ),
               onPressed: () {
                 Navigator.of(context).pop();
                 deleteCollection(currentlyOpenCollection);
@@ -643,11 +646,14 @@ class HomePageState extends State<HomePage> {
           actions: <Widget>[
             FlatButton(
                 child: Text('Cancel'),
-                onPressed: (){
+                onPressed: () {
                   Navigator.of(context).pop();
-            }),
+                }),
             FlatButton(
-              child: Text('Delete', style: new TextStyle(color: Colors.red),),
+              child: Text(
+                'Delete',
+                style: new TextStyle(color: Colors.red),
+              ),
               onPressed: () {
                 Navigator.of(context).pop();
                 deleteItem(currentlyOpenItem);
@@ -711,17 +717,62 @@ class HomePageState extends State<HomePage> {
   void deleteItem(CollectionItem item) {
     logger.logM("deleteItem", CollectionItem, item);
 
+    currentlyOpenCollection.savedItems.remove(item);
+
     persistence.deleteItem(currentlyOpenCollection.name, item);
     setState(() {
       currentlyOpenItem = null;
     });
+    Navigator.of(context).pop();
   }
 
   void deleteCollection(Collection collection) {
     logger.logM("deleteCollection", Collection, collection);
+
+    savedCollections.remove(collection);
+
     persistence.deleteCollection(collection);
     setState(() {
       currentlyOpenCollection = null;
     });
+    Navigator.of(context).pop();
+  }
+
+  void openSettingsMenu() {
+    Navigator.of(context)
+        .push(MaterialPageRoute<void>(builder: (BuildContext context) {
+      return Scaffold(
+        appBar: AppBar(
+          title: Text('Settings'),
+        ),
+        body: Center(
+          child: Text('This function is not yet implemented. \n '
+              'But hang in there, it will come sooner than you think.'),
+        ),
+      );
+    }));
+  }
+
+  void openAbout() {
+    Navigator.of(context)
+        .push(MaterialPageRoute<void>(builder: (BuildContext context) {
+      return Scaffold(
+        appBar: AppBar(
+          title: Text('About'),
+        ),
+        body: ListView(
+          children: <Widget>[
+            detailUI.createdBy(),
+            createStuffUI.spaceDivider(),
+            detailUI.contactInfo(),
+            createStuffUI.spaceDivider(),
+            detailUI.declarationOfSomething(),
+            createStuffUI.spaceDivider(),
+            detailUI.versionInfo(),
+            createStuffUI.spaceDivider(),
+          ],
+        ),
+      );
+    }));
   }
 }
