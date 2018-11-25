@@ -669,10 +669,9 @@ class HomePageState extends State<HomePage> {
     String name, description;
     //TODO rewrite
 
-    Collection newCollection;
+    Collection newCollection = Collection("", "", null, "");
     newCollection.currency = currentlyOpenCollection.currency;
     newCollection.savedItems = currentlyOpenCollection.savedItems;
-
 
     if (editCollectionName.text != "") {
       name = editCollectionName.text;
@@ -692,7 +691,9 @@ class HomePageState extends State<HomePage> {
 //    logger.log(currentlyOpenCollection.toString());
 
     persistence.updateCollection(currentlyOpenCollection, newCollection);
-
+    setState(() {
+      currentlyOpenCollection = newCollection;
+    });
     leaveScreen();
   }
 
@@ -701,7 +702,7 @@ class HomePageState extends State<HomePage> {
     int count, value;
     //TODO rewrite
 
-    CollectionItem newItem;
+    CollectionItem newItem = CollectionItem("", "", 0, 0, "");
 
     if (editItemName.text != "") {
       name = editItemName.text;
@@ -731,7 +732,11 @@ class HomePageState extends State<HomePage> {
       newItem.value = currentlyOpenItem.value;
     }
 
-    persistence.updateItem(currentlyOpenCollection.name, currentlyOpenItem, newItem);
+    persistence.updateItem(
+        currentlyOpenCollection.name, currentlyOpenItem, newItem);
+    setState(() {
+      currentlyOpenItem = newItem;
+    });
 
     leaveScreen();
   }
